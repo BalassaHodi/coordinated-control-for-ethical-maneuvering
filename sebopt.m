@@ -2,8 +2,8 @@ function seb=sebopt(delta)
 global OK;
 global vehsD vehstate t;
 global palya;
-global va;
 global costmap sebesseg;
+global va_max;
 
 %vehicle parameters
 C1 = 80000;
@@ -14,7 +14,7 @@ J = 2500;
 m = 1500;
 Ts=0.1;
 
-for seb=min(60,round(sebesseg(t-1)*3.6)+3):-1:max(0,round(sebesseg(t-1)*3.6)-3)
+for seb=min(va_max*3.6,round(sebesseg(t-1)*3.6)+3):-1:max(0,round(sebesseg(t-1)*3.6)-3)
     if seb<0.1
         seb=0.01;
     end;

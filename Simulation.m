@@ -1,33 +1,47 @@
-clearvars -except num_sim num_good_sim; close all; % clc;
+clearvars -except num_sim num_good_sim;
+close all;
+% clc;
 
-global OK;
-global vehsD vehstate t;
-global palya;
-global va;
-global costmap kormanyszog sebesseg;
+% Global variables
+global OK;          % [boolean] variable for debugging
+global vehsD;       % [n-by-1 double] (n: states of the discrete state space model: [psi, v_y, y])
+global vehstate;    % [n-by-m double] (n: time steps) (m: states of av. and hv.: [x_av, y_av, psi_av, x_hv])
+global t;           % [double] (time index (the index of a given time step))
+global palya;       % [n-by-m array] (n: time steps) (m: the poses of the reference route from the RRT: [x, y, psi, length])
+global costmap;     % [vehicleCostmap] (the vehicle costmap representing the planning search space around the av.)
+global kormanyszog; % [1-by-m double] (m: the steering angles actually given to the actuator in radians in each time step)
+global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
+global va_max;      % [double] the maximum velocity of the av. in m/s
 
-%vehicle parameters
-C1 = 80000;
-C2 = 120000;
-l1 = 2.2;
-l2 = 2.3;
-J = 2500;
-m = 1500;
-Ts=0.1;
-%x_dot = A * [ddot_psi; dot_vy; vy] + B * delta;
+% Vehicles constant parameters
+C1 = 80000;     % cornering stiffness of front tires
+C2 = 120000;    % cornering stiffness of back tires
+l1 = 2.2;       % distance between COG and front axle
+l2 = 2.3;       % distance between COG and back axle
+J = 2500;       % inertia around axis z of the vehicle
+m = 1500;       % mass of the vehicle
+
+% Simulation constant parameters
+Ts = 0.1;       % Sample time
+T = 0:Ts:15*Ts; % The times belonging to the time indexes
+
+% State space equation
+% x_dot = A * [ddot_psi; dot_vy; vy] + B * delta;
 
 
-% szimulációs lépés
-current_run = 0
+% Number of simulation step in the foor loop (displayed on command window)
+current_run = 0;
 
-va=60/3.6;
-vh=40/3.6;          %human-driven vehicle sebessége
-Ts=0.1;
-vehsD=[0;0;0];          %initial condition
-vehstate(1,:)=[1, 2.5, 0, 15];  %initial condition
-kormanyszog=0;
-sebesseg(1)=va;
-T=[0:Ts:15*Ts];
+% Initial values
+va_max = 60/3.6;                 % the maximum velocity of the av. in m/s
+vh = 40/3.6;                     % human-driven vehicle velocity in m/s (for the whole simulation remains the same)
+vehsD = [0; 0; 0];               % initial condition
+vehstate(1,:) = [1, 2.5, 0, 15]; % the av. is in the begining of the route and in the middle of its lane, ...
+                                 % the hv. is at the opposite end of the opposite lane
+kormanyszog(1) = 0;              % the initial steering angle in radians
+sebesseg(1) = va_max;            % av. initial velocity in m/s
+
+
 
 
 for t=2:length(T)
@@ -95,7 +109,7 @@ for i=1:length(vehstate)
 end;
 
 figure;
-plot([0:Ts:15*Ts],[va sebesseg(2:length(sebesseg))]*3.6)
+plot([0:Ts:15*Ts],[sebesseg(1) sebesseg(2:length(sebesseg))]*3.6)
 
 figure;
 plot([0:Ts:15*Ts],[0 kormanyszog(2:length(kormanyszog))]*180/pi)

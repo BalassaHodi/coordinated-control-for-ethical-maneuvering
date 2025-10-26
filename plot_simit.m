@@ -18,7 +18,7 @@ figure; %hold on;
 plot([0:Ts:15*Ts],[0 sebesseg(2:length(sebesseg))]);
 seb=[0:Ts:15*Ts;0 sebesseg(2:length(sebesseg))];
 j=2;
-seb2=[0;60/3.6];
+seb2=[0;va_max];
 for i=0.1:0.01:2
     seb2(1,j)=i;
     seb2(2,j)=0.4*interp1(seb(1,:),seb(2,:),i)+0.6*(seb2(2,j-1));

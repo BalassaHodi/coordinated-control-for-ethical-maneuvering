@@ -5,7 +5,8 @@ OK = false;
 num_sim = 0;
 num_good_sim = 0;
 
-for i=1:100
+% for i=1:20
+while ~OK
     num_sim = num_sim + 1;
     run Simulation.m
     if ~OK
