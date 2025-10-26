@@ -1,4 +1,5 @@
-clear all; close all; clc;
+clearvars -except num_sim num_good_sim; close all; % clc;
+
 global OK;
 global vehsD vehstate t;
 global palya;
@@ -16,6 +17,9 @@ Ts=0.1;
 %x_dot = A * [ddot_psi; dot_vy; vy] + B * delta;
 
 
+% szimulációs lépés
+current_run = 0
+
 va=60/3.6;
 vh=40/3.6;          %human-driven vehicle sebessége
 Ts=0.1;
@@ -27,8 +31,15 @@ T=[0:Ts:15*Ts];
 
 
 for t=2:length(T)
+    % szimulációs lépés
+    current_run = current_run + 1
+
     %megtervezzük a pályát
     palya=palyagen(vehstate(t-1,:));
+    if ~OK
+        break
+    end
+
     %
     %jmumozgas a human-driven jmure
     vehstate(t,4)=vehstate(t-1,4)-Ts*vh;
@@ -65,13 +76,15 @@ for t=2:length(T)
     vehstate(t,3)=vehsD(1);
     vehstate(t,1)=vehstate(t-1,1)+v_x*Ts*cos(vehstate(t,3)); %[1, 2.5, 0, 15];
     vehstate(t,2)=vehstate(t-1,2)+v_x*Ts*sin(vehstate(t,3));
-    fin=vehstate(t,1:3)
+    fin=vehstate(t,1:3);
     sebesseg(t)=v_x;
     kormanyszog(t)=korm;
 end;
-save results;
 
+% save results;
 
+%% Diagrammok készítése
+%{
 %plottolás
 load results;
 for i=1:length(vehstate)
@@ -86,5 +99,8 @@ plot([0:Ts:15*Ts],[va sebesseg(2:length(sebesseg))]*3.6)
 
 figure;
 plot([0:Ts:15*Ts],[0 kormanyszog(2:length(kormanyszog))]*180/pi)
+%}
 
-
+if OK
+    run plot_simit.m
+end

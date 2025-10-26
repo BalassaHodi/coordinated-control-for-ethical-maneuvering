@@ -1,6 +1,8 @@
 function kimenet=palyagen(input)        %1-3 sajat jmu;   4 masik jmu X
 global OK;
 global costmap;
+global palya;
+
 mapWidth = 30;
 mapLength = 10;
 costVal = 0;
@@ -29,9 +31,20 @@ setCosts(costmap,xyPoint3,occupiedVal);
 startPose = input(1:3);%[1, 2.5, 0]; % [meters, meters, degrees]
 goalPose  = [25, 2.5, 0];
 
+% Check the startpose
+OK = checkFree(costmap, startPose);
+if ~OK
+    kimenet = palya;
+    disp('A startPose nem megfelelő');
+    return;
+end
+
 planner = pathPlannerRRT(costmap,'MinTurningRadius',10);
 refPath = plan(planner,startPose,goalPose);
-OK= checkPathValidity(refPath,costmap);
+OK = checkPathValidity(refPath,costmap);
+
+% plottolás
+figure;
 plot(planner)
 
 %pályaadatok kiszedése

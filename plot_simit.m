@@ -1,6 +1,6 @@
-close all;
+% close all;
 Ts=0.1;
-load results;
+% load results;
 
 figure; %hold on;
 %plot([0:Ts:20*Ts],[0 kormanyszog(2:length(kormanyszog))]*180/pi);
