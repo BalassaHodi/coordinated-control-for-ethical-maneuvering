@@ -1,3 +1,7 @@
+%{
+This is the main script to control the different simulations and evaluate them.
+%}
+
 clc;
 global OK;
 

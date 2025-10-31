@@ -1,9 +1,13 @@
+%{
+This script runs the simulation for every timestep.
+%}
+
 clearvars -except num_sim num_good_sim;
 close all;
 % clc;
 
 % Global variables
-global OK;          % [boolean] variable for debugging
+global OK;          % [boolean] variable for debugging. True if path was created well, false if not.
 global vehsD;       % [n-by-1 double] (n: states of the discrete state space model: [psi, v_y, y])
 global vehstate;    % [n-by-m double] (n: time steps) (m: states of av. and hv.: [x_av, y_av, psi_av, x_hv])
 global t;           % [double] (time index (the index of a given time step))
@@ -43,65 +47,84 @@ sebesseg(1) = va_max;            % av. initial velocity in m/s
 
 
 
-
-for t=2:length(T)
-    % szimulációs lépés
+% The simulation (loop that runs for every timestep)
+for t = 2:length(T)
+    % The number of the current simulation step (display it to cmd wdw)
     current_run = current_run + 1
 
-    %megtervezzük a pályát
-    palya=palyagen(vehstate(t-1,:));
+    % Generate the path that the av. should follow
+    palya = palyagen(vehstate(t-1,:));
+
+    % If there's an error during the generation of the "palya", the for loop should stop
     if ~OK
         break
     end
+    
 
-    %
-    %jmumozgas a human-driven jmure
-    vehstate(t,4)=vehstate(t-1,4)-Ts*vh;
-    %
-    %mozgas optimalizálása az autonom jmure
-    A=[];
-    b=[];
-    Aeq=[];
-    beq=[];
-    lb=-15*pi/180;
-    ub=15*pi/180;
+    % Refresh the position of the hv.
+    vehstate(t,4) = vehstate(t-1,4) - Ts*vh;
+    
+
+    % Optimize the steering angle of the av.
+    A = [];
+    b = [];
+    Aeq = [];
+    beq = [];
+    lb = -15*pi/180;    % the lower bound of the steering angle
+    ub=15*pi/180;       % the upper bound of the steering angle
+    % based on the function created in 'fun.m', the fmincon minimalizes the cost of that function, and returns the optimized delta
     [delta,FVAL,EXITFLAG] = fmincon(@fun,0,A,b,Aeq,beq,lb,ub);
-    korm=0.8*delta+0.2*kormanyszog(t-1);
-    %kiszámítjuk a végleges értékeket
-    %kiszámítjuk a végleges értékeket
-    if palya(1,:)==palya(2,:)
+    % the final steering angle (that goes to the actuator) is calculated (to smooth the steering angle)
+    korm = 0.8*delta + 0.2*kormanyszog(t-1);
+
+
+    % Optimize the velocity of the vehicle
+    if palya(1,:) == palya(2,:)
         disp('nem lepett be')
-        seb=max(round(sebesseg(t-1)*3.6)-3,0.01);
-    else;
+        % maximum deceleration is applied
+        seb = max(round(sebesseg(t-1)*3.6)-3,0.01);
+    else
         disp('belepett')
-        seb=sebopt(korm);
-    end;
+        % calculate the optimal velocity of the vehicle
+        seb = sebopt(korm);
+    end
+
+
+    % refresh the states based on the vehicle dynamics
     v_x = seb/3.6;
     A = [(-C1*l1^2-C2*l2^2)/(J*v_x), (-C1*l1+C2*l2)/(J*v_x), 0;
          (-C1*l1+C2*l2)/(m*v_x)-v_x, (-C1-C2)/(m*v_x), 0;
          0, 1, 0];
     B = [C1*l1/J; C1/m; 0];
-    C=[0 0 1;
+    C = [0 0 1;
         1 0 0];
-    D=[0;0];
-    sysC=ss(A,B,C,D);
-    sysD=c2d(sysC,Ts);
-    vehsD=sysD.A*vehsD+sysD.B*korm;
-    vehstate(t,3)=vehsD(1);
-    vehstate(t,1)=vehstate(t-1,1)+v_x*Ts*cos(vehstate(t,3)); %[1, 2.5, 0, 15];
-    vehstate(t,2)=vehstate(t-1,2)+v_x*Ts*sin(vehstate(t,3));
-    fin=vehstate(t,1:3);
-    sebesseg(t)=v_x;
-    kormanyszog(t)=korm;
-end;
+    D = [0;0];
+    sysC = ss(A,B,C,D);
+    sysD = c2d(sysC,Ts);
+    
+    % refresh the global vector of states of the discrete ss system
+    vehsD = sysD.A*vehsD + sysD.B*korm;
+    
+    % calculate the elements of the state of the av. based on vehsD
+    vehstate(t,3) = vehsD(1);   % psi [rad]
+    vehstate(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate(t,3));    % x_av [m/s]
+    vehstate(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate(t,3));    % y_av [m/s]
 
+    
+    % Store the velocity and steering angle
+    sebesseg(t) = v_x;
+    kormanyszog(t) = korm;
+end
+
+% Save the results (every variable, if needed)
 % save results;
 
-%% Diagrammok készítése
+% Create figures
+% The creation of the figures are insidethe palyagen.m function
 %{
-%plottolás
 load results;
-for i=1:length(vehstate)
+
+for i = 1:length(vehstate)
     if vehstate(i,1)<25
         figure;
         palyagen(vehstate(i,:));
@@ -115,6 +138,7 @@ figure;
 plot([0:Ts:15*Ts],[0 kormanyszog(2:length(kormanyszog))]*180/pi)
 %}
 
+% Create the figure of the velocity profile, and the steering angle over time
 if OK
     run plot_simit.m
 end
