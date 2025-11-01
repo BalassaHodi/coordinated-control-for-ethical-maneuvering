@@ -89,7 +89,7 @@ concepts from the paper?
 
 % IMPROVE PATH PLANNING
 % Create the RRT* path planning algorithm
-planner = pathPlannerRRT(costmap,'MinTurningRadius',10,'ConnectionDistance',2,'GoalTolerance',[1, 2, 5]);
+planner = pathPlannerRRT(costmap,'MinTurningRadius',10,'ConnectionDistance',2,'GoalTolerance',[2, 0.5, 5]);
 % refPath = plan(planner,startPose,goalPose);
 
 % Since RRT* is a probabilistic algorithm, if the path couldn't be created, try to create it again:
