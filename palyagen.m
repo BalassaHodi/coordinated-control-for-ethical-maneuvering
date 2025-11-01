@@ -79,6 +79,10 @@ This has to be done, because now the program is not working well.
 This ERROR was only present after I started refactor the code, because
 there was a mistake, that the startPose should've receive degrees data, but
 it received radians instead.
+
+One approach to make it work: only refresh the path if the previous path
+has a collision. The question is: is this approach approved by the ethical
+concepts from the paper?
 %}
 
 % Create the RRT* path planning algorithm
@@ -108,7 +112,7 @@ for i = 1:length(refPath.PathSegments(1,:))
 end
 
 % The output is the refernce path
-kimenet=palya;
+kimenet = palya;
 
 % Clear the costmap
 clear costmap;
