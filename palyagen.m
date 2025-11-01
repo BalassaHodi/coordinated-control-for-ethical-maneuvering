@@ -85,17 +85,35 @@ has a collision. The question is: is this approach approved by the ethical
 concepts from the paper?
 %}
 
-% Create the RRT* path planning algorithm
-planner = pathPlannerRRT(costmap,'MinTurningRadius',10);
-refPath = plan(planner,startPose,goalPose);
 
-% Refresh the path if it's OK
-OK = checkPathValidity(refPath,costmap);
-if ~OK
+
+% IMPROVE PATH PLANNING
+% Create the RRT* path planning algorithm
+planner = pathPlannerRRT(costmap,'MinTurningRadius',10,'ConnectionDistance',2,'GoalTolerance',[1, 2, 5]);
+% refPath = plan(planner,startPose,goalPose);
+
+% Since RRT* is a probabilistic algorithm, if the path couldn't be created, try to create it again:
+maxAttempts = 10;
+pathFound = false;
+
+for attempt = 1:maxAttempts
+    refPath = plan(planner,startPose,goalPose);
+
+    OK = checkPathValidity(refPath,costmap);
+    if OK
+        pathFound = true;
+        break;
+    end
+
+    disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
+end
+
+if ~pathFound
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
     return
 end
+
 
 
 % Plot the actual planned path
