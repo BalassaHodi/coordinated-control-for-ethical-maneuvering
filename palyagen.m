@@ -69,20 +69,17 @@ if ~OK
 end
 
 %{
-ERROR HERE, that has to be fixed!
-Here is a problem. The path planning algorithm cannot create a path from
-the 3rd iteration in the loop of Simulation.m. It is beacuse it cannot
-create a proper path without collision. To fix this we have to create the
-environment a little different (for example less inflated area ...).
-This has to be done, because now the program is not working well.
+Path planning algorithm has been improved. The changes are the following:
+1. The connection distance had been set to 2 m instead of the default 5
+2. There's a tolerance in the goal position: [2, 0.5, 5], which can be
+consodered good.
+3. If the refpath could not been created, than it tries to create it 10
+more times. If there are 10 failed attempts on creating the path, then the
+the path planning is considered to be failed.
 
-This ERROR was only present after I started refactor the code, because
-there was a mistake, that the startPose should've receive degrees data, but
-it received radians instead.
-
-One approach to make it work: only refresh the path if the previous path
-has a collision. The question is: is this approach approved by the ethical
-concepts from the paper?
+One more imporvement can be considered in the path planning algorithm:
+Before creating a new path, check that the previous path is good for us,
+if yes, than dont create a new path, just follow this one.
 %}
 
 
