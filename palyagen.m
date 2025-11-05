@@ -14,7 +14,8 @@ function kimenet = palyagen(input)
 global OK;
 global costmap;
 global palya;
-
+global all_refPath;
+global t;
 
 % Create the costmap
 mapWidth = 30;
@@ -111,6 +112,8 @@ if ~pathFound
     return
 end
 
+% Store the created refPath
+all_refPath(t-1) = refPath;
 
 
 % Plot the actual planned path

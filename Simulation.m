@@ -16,6 +16,10 @@ global costmap;     % [vehicleCostmap] (the vehicle costmap representing the pla
 global kormanyszog; % [1-by-m double] (m: the steering angles actually given to the actuator in radians in each time step)
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
+global all_refPath; % [1-by-m Path] (m: the number of driving.Path objects (reference Paths from palyagen.m)
+
+% Initialize global variables
+all_refPath = driving.Path.empty();
 
 % Vehicles constant parameters
 C1 = 80000;     % cornering stiffness of front tires
