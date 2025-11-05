@@ -81,6 +81,15 @@ the path planning is considered to be failed.
 One more imporvement can be considered in the path planning algorithm:
 Before creating a new path, check that the previous path is good for us,
 if yes, than dont create a new path, just follow this one.
+
+Improve path planning algorithm towards safety:
+Steps:
+1. Get the previous path from all_refPath 
+2. Check wether it's still valid
+3. If yes, than create the new reference path by:
+    3.1. the first element of palya will be the startPose
+    3.2. the rest elements are the elements from the PathSegments of the
+    previous path
 %}
 
 
@@ -88,7 +97,6 @@ if yes, than dont create a new path, just follow this one.
 % IMPROVE PATH PLANNING
 % Create the RRT* path planning algorithm
 planner = pathPlannerRRT(costmap,'MinTurningRadius',10,'ConnectionDistance',2,'GoalTolerance',[2, 0.5, 5]);
-% refPath = plan(planner,startPose,goalPose);
 
 % Since RRT* is a probabilistic algorithm, if the path couldn't be created, try to create it again:
 maxAttempts = 10;
@@ -106,11 +114,39 @@ for attempt = 1:maxAttempts
     disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
+
+% Path couldn't be created in this iteration, so try to use the previous path
+if ~pathFound
+    disp('Előző referenciapálya használata...')
+    % Work with the previous path
+    if t > 2
+        % Get the previous path from all_refPath
+        previousPath = all_refPath(t-2);
+        
+        % Check the validity of the previous path
+        OK = checkPathValidity(previousPath,costmap)
+        if OK
+            pathFound = true;
+            
+            % If the previous path is valid, than this will be the palya
+            % Create the palya array
+            palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0]
+            for i = 1:length(previousPath.PathSegments)
+                % Check where the startPose is now
+                
+            end
+        end
+    end
+end
+
+
+% If none of the ways was succesfull:
 if ~pathFound
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
     return
 end
+
 
 % Store the created refPath
 all_refPath(t-1) = refPath;
