@@ -14,7 +14,6 @@ function kimenet = palyagen(input)
 global OK;
 global costmap;
 global palya;
-global all_refPath;
 global all_palya;
 global t;
 
@@ -130,68 +129,43 @@ if ~pathFound
     if t > 2
         % Get the previous palya
         previous_palya = all_palya{t-2};
+        
+        % Check the startPose boolean
+        startPose_good = false;
 
         % Check where the startPose is now
         palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0];
         for i = 1:size(previous_palya,1)
-            if palya(1,1) < previous_palya(1,1)
+            if palya(1,1) < previous_palya(i,1)
                 startIndex = i;
+                startPose_good = true;
                 break
-            else
-                warning('Hiba! A startPose nincs benne az előző pályában.')
             end
         end
-        
-        % Create the new palya array while checking wether the poses are free
-        for i = 2:(size(previous_palya)-startIndex+2)
-            % HERE I AM NOW
+
+        % Check the startPose
+        if ~startPose_good
+            pathFound = false;
+        else
+            % Create the new palya array while checking wether the poses are free
+            for i = 2:(size(previous_palya,1)-startIndex+2)
+                palya(i,:) = previous_palya(startIndex+i-2,:);
+                OK = checkFree(costmap,[palya(i,1), palya(i,2), palya(i,3)*pi/180]);
+                if OK
+                    pathFound = true;
+                end
+            end
         end
-        
+    end
+
+    if pathFound
+        disp('Az előző referenciapálya van felhasználva.');
+        all_palya{t-1} = palya;
+        kimenet = palya;
+        clear costmap;
+        return
     end
 end
-
-% % Path couldn't be created in this iteration, so try to use the previous path
-% if ~pathFound
-%     disp('Előző referenciapálya használata...')
-%     % Work with the previous path
-%     if t > 2
-%         % Get the previous path from all_refPath
-%         previousPath = all_refPath(t-2);
-% 
-%         % Check the validity of the previous path
-%         OK = checkPathValidity(previousPath,costmap);
-%         if OK
-%             pathFound = true;
-% 
-%             % If the previous path is valid, than this will be the palya
-%             % Create the palya array
-%             palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0]
-%             for i = 1:length(previousPath.PathSegments)
-%                 % Check where the startPose is now
-%                 if startPose(1) < previousPath.PathSegments(i).GoalPose(1)
-%                     actual_in_deg = previousPath.PathSegments(i).GoalPose;
-%                     actual = [actual_in_deg(1), actual_in_deg(2), actual_in_deg(3)*pi/180];
-%                     hossz = sqrt((actual(1)-palya(1,1))^2 + (actual(2)-palya(1,2))^2);
-%                     palya(2,:) = [actual, hossz];
-%                     pathSegmentIndex = i;
-%                     break
-%                 else
-%                     warning('Hiba! Nem lépett be az elágazásba!');
-%                 end
-%             end
-% 
-%             for i = 3:(length(previousPath.PathSegments))
-%                 actual_in_deg = previousPath.PathSegments(pathSegmentIndex+i-2).GoalPose;
-%                 actual = [actual_in_deg(1), actual_in_deg(2), actual_in_deg(3)*pi/180];
-%                 hossz = sqrt((actual(1)-palya(i-1,1))^2 + (actual(2)-palya(i-1,2))^2);
-%                 palya(i,:) = [actual, hossz];
-%             end
-%         else
-%             disp('Az előző referenciapálya nem megfelelő.')
-%         end
-%     end
-% end
-
 
 % If none of the ways was succesfull:
 if ~pathFound
@@ -200,12 +174,7 @@ if ~pathFound
     return
 end
 
-
-% Store the created refPath
-all_refPath(t-1) = refPath;
-
-
-% Plot the actual planned path
+% Plot the actual planned path (if there was)
 figure;
 plot(planner)
 

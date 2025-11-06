@@ -16,14 +16,12 @@ global costmap;     % [vehicleCostmap] (the vehicle costmap representing the pla
 global kormanyszog; % [1-by-m double] (m: the steering angles actually given to the actuator in radians in each time step)
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
-global all_refPath; % [1-by-m Path] (m: the number of driving.Path objects (reference Paths from palyagen.m)
-global all_palya;   % 
+global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
 
 % The steps
 steps = 15;
 
 % Initialize global variables
-all_refPath = driving.Path.empty();
 all_palya = cell(steps,1);
 
 % Vehicles constant parameters
@@ -148,6 +146,11 @@ plot([0:Ts:15*Ts],[0 kormanyszog(2:length(kormanyszog))]*180/pi)
 %}
 
 % Create the figure of the velocity profile, and the steering angle over time
+% And also create the actual path of the car
 if OK
     run plot_simit.m
+    figure;
+    plot(vehstate(:,1),vehstate(:,2), 'o-b');
+    xlim([0, 30]);
+    ylim([0,10]);
 end
