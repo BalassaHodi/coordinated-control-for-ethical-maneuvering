@@ -15,7 +15,11 @@ global OK;
 global costmap;
 global palya;
 global all_refPath;
+global all_palya;
 global t;
+
+% Clear the palya from the previous iteration
+palya = double.empty();
 
 % Create the costmap
 mapWidth = 30;
@@ -90,6 +94,11 @@ Steps:
     3.1. the first element of palya will be the startPose
     3.2. the rest elements are the elements from the PathSegments of the
     previous path
+
+New approach:
+Store the palya variable in every step, than work with it, because it's
+much more easier.
+To check the path validity, just use the checkFree(vehiclePose) function.
 %}
 
 
@@ -114,30 +123,74 @@ for attempt = 1:maxAttempts
     disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
-
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    disp('Előző referenciapálya használata...')
+    disp('Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
-        % Get the previous path from all_refPath
-        previousPath = all_refPath(t-2);
-        
-        % Check the validity of the previous path
-        OK = checkPathValidity(previousPath,costmap)
-        if OK
-            pathFound = true;
-            
-            % If the previous path is valid, than this will be the palya
-            % Create the palya array
-            palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0]
-            for i = 1:length(previousPath.PathSegments)
-                % Check where the startPose is now
-                
+        % Get the previous palya
+        previous_palya = all_palya{t-2};
+
+        % Check where the startPose is now
+        palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0];
+        for i = 1:size(previous_palya,1)
+            if palya(1,1) < previous_palya(1,1)
+                startIndex = i;
+                break
+            else
+                warning('Hiba! A startPose nincs benne az előző pályában.')
             end
         end
+        
+        % Create the new palya array while checking wether the poses are free
+        for i = 2:(size(previous_palya)-startIndex+2)
+            % HERE I AM NOW
+        end
+        
     end
 end
+
+% % Path couldn't be created in this iteration, so try to use the previous path
+% if ~pathFound
+%     disp('Előző referenciapálya használata...')
+%     % Work with the previous path
+%     if t > 2
+%         % Get the previous path from all_refPath
+%         previousPath = all_refPath(t-2);
+% 
+%         % Check the validity of the previous path
+%         OK = checkPathValidity(previousPath,costmap);
+%         if OK
+%             pathFound = true;
+% 
+%             % If the previous path is valid, than this will be the palya
+%             % Create the palya array
+%             palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0]
+%             for i = 1:length(previousPath.PathSegments)
+%                 % Check where the startPose is now
+%                 if startPose(1) < previousPath.PathSegments(i).GoalPose(1)
+%                     actual_in_deg = previousPath.PathSegments(i).GoalPose;
+%                     actual = [actual_in_deg(1), actual_in_deg(2), actual_in_deg(3)*pi/180];
+%                     hossz = sqrt((actual(1)-palya(1,1))^2 + (actual(2)-palya(1,2))^2);
+%                     palya(2,:) = [actual, hossz];
+%                     pathSegmentIndex = i;
+%                     break
+%                 else
+%                     warning('Hiba! Nem lépett be az elágazásba!');
+%                 end
+%             end
+% 
+%             for i = 3:(length(previousPath.PathSegments))
+%                 actual_in_deg = previousPath.PathSegments(pathSegmentIndex+i-2).GoalPose;
+%                 actual = [actual_in_deg(1), actual_in_deg(2), actual_in_deg(3)*pi/180];
+%                 hossz = sqrt((actual(1)-palya(i-1,1))^2 + (actual(2)-palya(i-1,2))^2);
+%                 palya(i,:) = [actual, hossz];
+%             end
+%         else
+%             disp('Az előző referenciapálya nem megfelelő.')
+%         end
+%     end
+% end
 
 
 % If none of the ways was succesfull:
@@ -164,6 +217,9 @@ for i = 1:length(refPath.PathSegments(1,:))
     hossz = palya(i,4) + refPath.PathSegments(1,i).Length;
     palya(i+1,:) = [actual hossz];
 end
+
+% Store the palya
+all_palya{t-1} = palya;
 
 % The output is the refernce path
 kimenet = palya;

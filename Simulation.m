@@ -17,9 +17,14 @@ global kormanyszog; % [1-by-m double] (m: the steering angles actually given to 
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_refPath; % [1-by-m Path] (m: the number of driving.Path objects (reference Paths from palyagen.m)
+global all_palya;   % 
+
+% The steps
+steps = 15;
 
 % Initialize global variables
 all_refPath = driving.Path.empty();
+all_palya = cell(steps,1);
 
 % Vehicles constant parameters
 C1 = 80000;     % cornering stiffness of front tires
@@ -30,8 +35,8 @@ J = 2500;       % inertia around axis z of the vehicle
 m = 1500;       % mass of the vehicle
 
 % Simulation constant parameters
-Ts = 0.1;       % Sample time
-T = 0:Ts:15*Ts; % The times belonging to the time indexes
+Ts = 0.1;           % Sample time
+T = 0:Ts:steps*Ts;  % The times belonging to the time indexes
 
 % State space equation
 % x_dot = A * [ddot_psi; dot_vy; vy] + B * delta;
