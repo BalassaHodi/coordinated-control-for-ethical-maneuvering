@@ -5,6 +5,11 @@ The desired steering angle (delta) is calculated by minimalizing a
 pre-defined cost function.
 The cost function that has to be minimized is the following:
 J = (y_ref - y)^2 + 1.7 * (prev_delta - delta)^2
+---
+The input:
+- a delta value: [double] that is the steering angle
+The output:
+- a cost function: That has to be minimized with the changing of 'delta'
 %}
 
 function kimenet = fun(delta)
@@ -49,6 +54,9 @@ vehstate_(t,3) = vehsD_(1);
 vehstate_(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate_(t,3));
 vehstate_(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate_(t,3));
 
+% Interpolate the y_ref value from the palya
+y_ref = interp1(palya(:,1), palya(:,2), vehstate_(t,1));
+
 % The cost function that has to be minimized
-kimenet=(palya(2,2)-vehstate_(t,2))^2 + 1.7*(korm-kormanyszog(t-1))^2;
+kimenet=(y_ref-vehstate_(t,2))^2 + 1.7*(korm-kormanyszog(t-1))^2;
    
