@@ -17,7 +17,8 @@ global kormanyszog; % [1-by-m double] (m: the steering angles actually given to 
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
-global warnings;    %
+global warnings;    % 
+global emergency;   % [boolean] (true if the emergency situation happens (go straight with max deceleration)
 
 % The steps
 steps = 15;
@@ -25,6 +26,8 @@ steps = 15;
 % Initialize global variables
 all_palya = cell(steps,1);
 warnings = {};
+emergency = false;
+va_max = 60;
 
 % Vehicles constant parameters
 C1 = 80000;     % cornering stiffness of front tires
@@ -46,13 +49,13 @@ T = 0:Ts:steps*Ts;  % The times belonging to the time indexes
 current_run = 0;
 
 % Initial values
-va_max = 60/3.6;                 % the maximum velocity of the av. in m/s
+va = va_max/3.6;                 % the maximum velocity of the av. in m/s
 vh = 40/3.6;                     % human-driven vehicle velocity in m/s (for the whole simulation remains the same)
 vehsD = [0; 0; 0];               % initial condition
 vehstate(1,:) = [1, 2.5, 0, 15]; % the av. is in the begining of the route and in the middle of its lane, ...
                                  % the hv. is at the opposite end of the opposite lane
 kormanyszog(1) = 0;              % the initial steering angle in radians
-sebesseg(1) = va_max;            % av. initial velocity in m/s
+sebesseg(1) = va;            % av. initial velocity in m/s
 
 
 
@@ -64,36 +67,38 @@ for t = 2:length(T)
     % Generate the path that the av. should follow
     palya = palyagen(vehstate(t-1,:));
 
-    % If there's an error during the generation of the "palya", the for loop should stop
+    % If there's an error during the generation of the "palya", emergency scenario is true
     if ~OK
-        break
+        emergency = true;
+        warnings{end+1} = sprintf('(%d): Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!', t-1);
     end
     
 
     % Refresh the position of the hv.
     vehstate(t,4) = vehstate(t-1,4) - Ts*vh;
     
-
-    % Optimize the steering angle of the av.
-    A = [];
-    b = [];
-    Aeq = [];
-    beq = [];
-    lb = -15*pi/180;    % the lower bound of the steering angle
-    ub=15*pi/180;       % the upper bound of the steering angle
-    % based on the function created in 'fun.m', the fmincon minimalizes the cost of that function, and returns the optimized delta
-    [delta,FVAL,EXITFLAG] = fmincon(@fun,0,A,b,Aeq,beq,lb,ub);
-    % the final steering angle (that goes to the actuator) is calculated (to smooth the steering angle)
-    korm = 0.8*delta + 0.2*kormanyszog(t-1);
-
+    if ~emergency
+        % Optimize the steering angle of the av.
+        A = [];
+        b = [];
+        Aeq = [];
+        beq = [];
+        lb = -15*pi/180;    % the lower bound of the steering angle
+        ub=15*pi/180;       % the upper bound of the steering angle
+        % based on the function created in 'fun.m', the fmincon minimalizes the cost of that function, and returns the optimized delta
+        [delta,FVAL,EXITFLAG] = fmincon(@fun,0,A,b,Aeq,beq,lb,ub);
+        % the final steering angle (that goes to the actuator) is calculated (to smooth the steering angle)
+        korm = 0.8*delta + 0.2*kormanyszog(t-1);
+    else
+        korm = 0;
+    end
 
     % Optimize the velocity of the vehicle
-    if palya(1,:) == palya(2,:)
-        disp('nem lepett be')
+    if emergency
+        disp('Vészhelyzet van!')
         % maximum deceleration is applied
         seb = max(round(sebesseg(t-1)*3.6)-3,0.01);
     else
-        disp('belepett')
         % calculate the optimal velocity of the vehicle
         seb = sebopt(korm);
     end

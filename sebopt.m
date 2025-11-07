@@ -1,3 +1,4 @@
+
 %{
 This function implements the longitudinal control design of the av. during
 the simulation.
@@ -32,7 +33,7 @@ Ts = 0.1;
 
 
 % The for loop goes through the velocties from act_vel+3 to act_vel-3 (in km/h)
-for seb = min(va_max*3.6, round(sebesseg(t-1)*3.6) + 3):-1:max(0, round(sebesseg(t-1)*3.6) - 3)
+for seb = min(va_max, round(sebesseg(t-1)*3.6) + 3):-1:max(0, round(sebesseg(t-1)*3.6) - 3)
     % If the velocity is 0, than it shall be 0.01
     if seb < 0.1
         seb = 0.01;

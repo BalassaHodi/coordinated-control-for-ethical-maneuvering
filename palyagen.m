@@ -17,6 +17,7 @@ global palya;
 global all_palya;
 global t;
 global warnings;
+global emergency;
 
 % Clear the palya from the previous iteration
 palya = double.empty();
@@ -71,12 +72,7 @@ OK = checkFree(costmap, startPose);
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
 if ~OK
-    % kimenet = palya;
-    % disp('A startPose nem megfelelő');
-    % return
-
-    disp('A startPose nem megfelelő, így az előző referenciapálya használata...');
-    
+    disp('A startPose nem megfelelő, így az előző referenciapálya használata...');   
 
     % Work with the previous path
     if t > 2
@@ -112,6 +108,7 @@ if ~OK
     end
 
     if pathFound
+        emergency = false;
         disp('Az előző referenciapálya van felhasználva.');
         all_palya{t-1} = palya;
         kimenet = palya;
@@ -123,8 +120,9 @@ else
     pathFound = false;
 end
 
-% If the path couldn't be created.
+% If the path couldn't be created, emergency scenario
 if ~pathFound && ~OK
+    emergency = true;
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
     warnings{end+1} = sprintf('(%d): A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.',t-1);
@@ -180,6 +178,7 @@ for attempt = 1:maxAttempts
     OK = checkPathValidity(refPath,costmap);
     if OK
         pathFound = true;
+        emergency = false;
         if attempt ~= 1
             warnings{end+1} = sprintf('(%d): A referenciapálya létrehozása %d. iterációra történt meg.', t-1, attempt);
         end
@@ -226,6 +225,7 @@ if ~pathFound
     end
 
     if pathFound
+        emergency = false;
         disp('Az előző referenciapálya van felhasználva.');
         all_palya{t-1} = palya;
         kimenet = palya;
@@ -237,6 +237,7 @@ end
 
 % If none of the ways was succesful:
 if ~pathFound
+    emergency = true;
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
     warnings{end+1} = sprintf('(%d): Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.',t-1);
