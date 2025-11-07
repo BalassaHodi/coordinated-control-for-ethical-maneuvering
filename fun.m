@@ -49,6 +49,9 @@ vehstate_(t,3) = vehsD_(1);
 vehstate_(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate_(t,3));
 vehstate_(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate_(t,3));
 
+% Interpolate the y_ref value from the palya
+y_ref = interp1(palya(:,1), palya(:,2), vehstate_(t,1));
+
 % The cost function that has to be minimized
-kimenet=(palya(2,2)-vehstate_(t,2))^2 + 1.7*(korm-kormanyszog(t-1))^2;
+kimenet=(y_ref-vehstate_(t,2))^2 + 1.7*(korm-kormanyszog(t-1))^2;
    
