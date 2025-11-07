@@ -5,6 +5,11 @@ The desired steering angle (delta) is calculated by minimalizing a
 pre-defined cost function.
 The cost function that has to be minimized is the following:
 J = (y_ref - y)^2 + 1.7 * (prev_delta - delta)^2
+---
+The input:
+- a delta value: [double] that is the steering angle
+The output:
+- a cost function: That has to be minimized with the changing of 'delta'
 %}
 
 function kimenet = fun(delta)

@@ -17,7 +17,7 @@ global kormanyszog; % [1-by-m double] (m: the steering angles actually given to 
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
-global warnings;    % 
+global warnings;    % [1-by-m cell] (m: the number of warnings for later purposes)
 global emergency;   % [boolean] (true if the emergency situation happens (go straight with max deceleration)
 
 % The steps
@@ -55,7 +55,7 @@ vehsD = [0; 0; 0];               % initial condition
 vehstate(1,:) = [1, 2.5, 0, 15]; % the av. is in the begining of the route and in the middle of its lane, ...
                                  % the hv. is at the opposite end of the opposite lane
 kormanyszog(1) = 0;              % the initial steering angle in radians
-sebesseg(1) = va;            % av. initial velocity in m/s
+sebesseg(1) = va;                % av. initial velocity in m/s
 
 
 

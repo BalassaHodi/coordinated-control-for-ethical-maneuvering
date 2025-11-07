@@ -7,6 +7,10 @@ change by 3 km/h.
 The approach here is that the veolcity shall remain the same (so no
 braking) unless with the higher speed the car goes into an inflated area
 (so the higher speed is not safe).
+---
+The input:
+- a delta value: [double] steering angle
+- a seb value: [double] a longitudinal velocity value
 %}
 
 

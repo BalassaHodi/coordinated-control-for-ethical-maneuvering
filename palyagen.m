@@ -60,6 +60,7 @@ setCosts(costmap,xyPoint3,occupiedVal);
 % plot(costmap)
 
 
+
 % Set the startPose and the goalPose of the av.
 % The startPose is based on the input, while the goalPose is the end of the av. lane
 startPose = [input(1), input(2), input(3)*180/pi]; % HERE WAS A BUG, the psi was not converted into degrees, while the startPose and the goalPose has to be in degrees!
@@ -99,9 +100,12 @@ if ~OK
             % Create the new palya array while checking wether the poses are free
             for i = 2:(size(previous_palya,1)-startIndex+2)
                 palya(i,:) = previous_palya(startIndex+i-2,:);
-                OK = checkFree(costmap,[palya(i,1), palya(i,2), palya(i,3)*pi/180]);
+                OK = checkFree(costmap,[palya(i,1), palya(i,2), -palya(i,3)*pi/180]);
                 if OK
                     pathFound = true;
+                else
+                    pathFound = false;
+                    break
                 end
             end
         end
@@ -123,6 +127,18 @@ end
 % If the path couldn't be created, emergency scenario
 if ~pathFound && ~OK
     emergency = true;
+
+    % Create the palya vector in case of emergency
+    palya = double.empty();
+    palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0];
+    idx = 2;
+    l = 2;
+    alpha = palya(1,3);
+    while palya(end, 1) <= 25
+        palya(idx,:) = [palya(idx-1,1)+cos(alpha)*l, palya(idx-1,2)+sin(alpha)*l, palya(1,3), palya(idx-1)+l];
+        idx = idx + 1;
+    end
+
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
     warnings{end+1} = sprintf('(%d): A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.',t-1);
@@ -216,9 +232,12 @@ if ~pathFound
             % Create the new palya array while checking wether the poses are free
             for i = 2:(size(previous_palya,1)-startIndex+2)
                 palya(i,:) = previous_palya(startIndex+i-2,:);
-                OK = checkFree(costmap,[palya(i,1), palya(i,2), palya(i,3)*pi/180]);
+                OK = checkFree(costmap,[palya(i,1), palya(i,2), -palya(i,3)*pi/180]);
                 if OK
                     pathFound = true;
+                else
+                    pathFound = false;
+                    break
                 end
             end
         end
@@ -238,15 +257,33 @@ end
 % If none of the ways was succesful:
 if ~pathFound
     emergency = true;
+
+    % Create the palya vector in case of emergency
+    palya = double.empty();
+    palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0];
+    idx = 2;
+    l = 2;
+    alpha = palya(1,3);
+    while palya(end, 1) <= 25
+        palya(idx,:) = [palya(idx-1,1)+cos(alpha)*l, palya(idx-1,2)+sin(alpha)*l, palya(1,3), palya(idx-1)+l];
+        idx = idx + 1;
+    end
+
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
     warnings{end+1} = sprintf('(%d): Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.',t-1);
     return
 end
 
+
+
+% If the path was created by RRT in the actual timestep
 % Plot the actual planned path (if there was)
 figure;
 plot(planner)
+
+% Support variable for same rows
+same_row = double.empty();
 
 % Create the output vector
 palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0]; % The same BUG was here
@@ -254,7 +291,20 @@ for i = 1:length(refPath.PathSegments(1,:))
     actual_in_deg = refPath.PathSegments(1,i).GoalPose;
     actual = [actual_in_deg(1), actual_in_deg(2), actual_in_deg(3)*pi/180];
     hossz = palya(i,4) + refPath.PathSegments(1,i).Length;
+    
+    % Sometimes inside the palya the same x-values are stored, we have delete them
+    if palya(i,1) == actual(1)
+        same_row(end+1) = i+1;
+    end
+
     palya(i+1,:) = [actual hossz];
+end
+
+% Sometimes inside the palya the same elements (x-values) are stored
+% So we have to make sure this doesnt happen
+for i = 1:length(same_row)
+    palya(same_row(i),:) = [];
+    warnings{end+1} = sprintf('(%d): Törölni kellett a %d. sort a pályából.', t-1, same_row(i));
 end
 
 % Store the palya
