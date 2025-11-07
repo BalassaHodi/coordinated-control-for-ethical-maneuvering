@@ -17,12 +17,14 @@ global kormanyszog; % [1-by-m double] (m: the steering angles actually given to 
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
+global warnings;    %
 
 % The steps
 steps = 15;
 
 % Initialize global variables
 all_palya = cell(steps,1);
+warnings = {};
 
 % Vehicles constant parameters
 C1 = 80000;     % cornering stiffness of front tires

@@ -4,6 +4,7 @@ This is the main script to control the different simulations and evaluate them.
 
 clc;
 global OK;
+global warnings;
 
 OK = false;
 num_sim = 0;
@@ -24,3 +25,7 @@ end
 disp(['Összes szimuláció: ', num2str(num_sim)]);
 disp(['Jó szimulációk: ', num2str(num_good_sim)]);
 disp(['A sikeres szimulációk aránya: ', num2str(num_good_sim/num_sim)]);
+disp('Az ideálistól eltérő események:');
+for i = 1:length(warnings)
+    disp(warnings{i})
+end
