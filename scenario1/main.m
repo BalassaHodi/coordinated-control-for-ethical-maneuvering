@@ -10,10 +10,13 @@ OK = false;
 num_sim = 0;
 num_good_sim = 0;
 
-% for i=1:20
-while ~OK
+for i=1:100
+%while ~OK
     num_sim = num_sim + 1;
     run Simulation.m
+
+    OK = ~any(contains(warnings, "Vészhelyzet!"));
+
     if ~OK
         warning(['Hiba a ', num2str(num_sim), '. szimulációban.']);
     else
