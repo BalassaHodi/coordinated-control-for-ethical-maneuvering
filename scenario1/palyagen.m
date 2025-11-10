@@ -68,7 +68,7 @@ goalPose  = [25, 2.5, 0];
 
 
 % Check the startpose
-OK = checkFree(costmap, startPose);
+OK = checkFree(costmap, [startPose(1), startPose(2), startPose(3)]);
 
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
@@ -100,7 +100,7 @@ if ~OK
             % Create the new palya array while checking wether the poses are free
             for i = 2:(size(previous_palya,1)-startIndex+2)
                 palya(i,:) = previous_palya(startIndex+i-2,:);
-                OK = checkFree(costmap,[palya(i,1), palya(i,2), -palya(i,3)*pi/180]);
+                OK = checkFree(costmap,[palya(i,1), palya(i,2), 360-palya(i,3)*180/pi]);
                 if OK
                     pathFound = true;
                 else
@@ -232,7 +232,7 @@ if ~pathFound
             % Create the new palya array while checking wether the poses are free
             for i = 2:(size(previous_palya,1)-startIndex+2)
                 palya(i,:) = previous_palya(startIndex+i-2,:);
-                OK = checkFree(costmap,[palya(i,1), palya(i,2), -palya(i,3)*pi/180]);
+                OK = checkFree(costmap,[palya(i,1), palya(i,2), 360-palya(i,3)*180/pi]);
                 if OK
                     pathFound = true;
                 else
@@ -282,8 +282,6 @@ end
 figure;
 plot(planner)
 
-% Support variable for same rows
-same_row = double.empty();
 
 % Create the output vector
 palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0]; % The same BUG was here
@@ -291,20 +289,16 @@ for i = 1:length(refPath.PathSegments(1,:))
     actual_in_deg = refPath.PathSegments(1,i).GoalPose;
     actual = [actual_in_deg(1), actual_in_deg(2), actual_in_deg(3)*pi/180];
     hossz = palya(i,4) + refPath.PathSegments(1,i).Length;
-    
-    % Sometimes inside the palya the same x-values are stored, we have delete them
-    if palya(i,1) == actual(1)
-        same_row(end+1) = i+1;
-    end
-
     palya(i+1,:) = [actual hossz];
 end
 
 % Sometimes inside the palya the same elements (x-values) are stored
 % So we have to make sure this doesnt happen
-for i = 1:length(same_row)
-    palya(same_row(i),:) = [];
-    warnings{end+1} = sprintf('(%d): Törölni kellett a %d. sort a pályából.', t-1, same_row(i));
+[uniquePalyaX,ia,ic] = unique(palya(:,1),"stable","last");
+removedIndices = setdiff(1:length(palya(:,1)),ia);
+for i = 1:length(removedIndices)
+    palya(removedIndices(i),:) = [];
+    warnings{end+1} = sprintf('(%d): Törölni kellett a %d. sort a pályából.',t-1,removedIndices(i));
 end
 
 % Store the palya

@@ -2,7 +2,7 @@
 This script runs the simulation for every timestep.
 %}
 
-clearvars -except num_sim num_good_sim;
+clearvars -except num_sim num_good_sim all_warnings;
 close all;
 % clc;
 
