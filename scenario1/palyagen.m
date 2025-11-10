@@ -68,7 +68,7 @@ goalPose  = [25, 2.5, 0];
 
 
 % Check the startpose
-OK = checkFree(costmap, [startPose(1), startPose(2), startPose(3)+360]);
+OK = checkFree(costmap, [startPose(1), startPose(2), startPose(3)]);
 
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
@@ -100,7 +100,7 @@ if ~OK
             % Create the new palya array while checking wether the poses are free
             for i = 2:(size(previous_palya,1)-startIndex+2)
                 palya(i,:) = previous_palya(startIndex+i-2,:);
-                OK = checkFree(costmap,[palya(i,1), palya(i,2), palya(i,3)*180/pi+360]);
+                OK = checkFree(costmap,[palya(i,1), palya(i,2), 360-palya(i,3)*180/pi]);
                 if OK
                     pathFound = true;
                 else
@@ -232,7 +232,7 @@ if ~pathFound
             % Create the new palya array while checking wether the poses are free
             for i = 2:(size(previous_palya,1)-startIndex+2)
                 palya(i,:) = previous_palya(startIndex+i-2,:);
-                OK = checkFree(costmap,[palya(i,1), palya(i,2), palya(i,3)*180/pi+360]);
+                OK = checkFree(costmap,[palya(i,1), palya(i,2), 360-palya(i,3)*180/pi]);
                 if OK
                     pathFound = true;
                 else
