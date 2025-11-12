@@ -19,8 +19,8 @@ global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
 global warnings;    % [n-by-4 cell] (n: the number of warnings in a single simulation) (the columns: Code, Type, TimeStep, Description)
 global emergency;   % [boolean] (true if the emergency situation happens (go straight with max deceleration)
-global vh;
-global pedestrian;
+global vh;          % [double] (the constant longitudinal velocity of the hv. in m/s)
+global pedestrian;  % [1-by-2 double] (the x-y position of the pedestrian in m)
 
 % The steps
 steps = 15;
