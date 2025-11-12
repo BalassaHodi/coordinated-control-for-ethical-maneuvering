@@ -17,7 +17,7 @@ global kormanyszog; % [1-by-m double] (m: the steering angles actually given to 
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
-global warnings;    % [1-by-m cell] (m: the number of warnings for later purposes)
+global warnings;    % [n-by-4 cell] (n: the number of warnings in a single simulation) (the columns: Code, Type, TimeStep, Description)
 global emergency;   % [boolean] (true if the emergency situation happens (go straight with max deceleration)
 
 % The steps
@@ -70,7 +70,7 @@ for t = 2:length(T)
     % If there's an error during the generation of the "palya", emergency scenario is true
     if ~OK
         emergency = true;
-        warnings{end+1} = sprintf('(%d): Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!', t-1);
+        warnings(end+1,:) = {1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
     end
     
 

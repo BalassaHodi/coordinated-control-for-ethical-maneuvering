@@ -12,16 +12,21 @@ global all_warnings;
 OK = false;
 num_sim = 0;
 num_good_sim = 0;
-simulations = 10;
+simulations = 5;
 all_warnings = {};
 
-% for i=1:simulations
-while ~OK
+for i=1:simulations
+%while ~OK
     num_sim = num_sim + 1;
     run Simulation.m
+    
+    if ~isempty(warnings)
+        OK = ~any(contains(warnings(:,2), 'Error'));
+    else
+        warnings(1,:) = {0, 'Info', 0, 'A szimuláció ideálisan lefutott.'};
+    end
 
-    OK = ~any(contains(warnings, "Vészhelyzet!"));
-    all_warnings{end+1} = warnings;
+    all_warnings{end+1,1} = warnings;
 
     if ~OK
         warning(['Hiba a ', num2str(num_sim), '. szimulációban.']);
@@ -35,6 +40,4 @@ disp(['Összes szimuláció: ', num2str(num_sim)]);
 disp(['Jó szimulációk: ', num2str(num_good_sim)]);
 disp(['A sikeres szimulációk aránya: ', num2str(num_good_sim/num_sim)]);
 disp('Az ideálistól eltérő események:');
-for i = 1:length(warnings)
-    disp(warnings{i})
-end
+disp(warnings)

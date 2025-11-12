@@ -117,7 +117,7 @@ if ~OK
         all_palya{t-1} = palya;
         kimenet = palya;
         clear costmap;
-        warnings{end+1} = sprintf('(%d): A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.',t-1);
+        warnings(end+1,:) = {2, 'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
         return
     end
 else
@@ -141,7 +141,7 @@ if ~pathFound && ~OK
 
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
-    warnings{end+1} = sprintf('(%d): A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.',t-1);
+    warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
 
@@ -196,7 +196,7 @@ for attempt = 1:maxAttempts
         pathFound = true;
         emergency = false;
         if attempt ~= 1
-            warnings{end+1} = sprintf('(%d): A referenciapálya létrehozása %d. iterációra történt meg.', t-1, attempt);
+            warnings(end+1,:) = {4, 'Info', t-1, sprintf('A referenciapálya létrehozása %d. iterációra történt meg.', attempt)};
         end
         break;
     end
@@ -249,7 +249,7 @@ if ~pathFound
         all_palya{t-1} = palya;
         kimenet = palya;
         clear costmap;
-        warnings{end+1} = sprintf('(%d): Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.',t-1);
+        warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
         return
     end
 end
@@ -271,7 +271,7 @@ if ~pathFound
 
     kimenet = palya;
     disp('Nem tudott létrejönni referenciapálya');
-    warnings{end+1} = sprintf('(%d): Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.',t-1);
+    warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
 
@@ -298,7 +298,7 @@ end
 removedIndices = setdiff(1:length(palya(:,1)),ia);
 for i = 1:length(removedIndices)
     palya(removedIndices(i),:) = [];
-    warnings{end+1} = sprintf('(%d): Törölni kellett a %d. sort a pályából.',t-1,removedIndices(i));
+    warnings(end+1,:) = {7, 'Info', t-1, sprintf('Törölni kellett a %d. sort a pályából.',removedIndices(i))};
 end
 
 % Store the palya
