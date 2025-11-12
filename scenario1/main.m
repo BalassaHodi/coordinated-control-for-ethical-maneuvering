@@ -7,7 +7,7 @@ clear;
 
 global OK;
 global warnings sebesseg kormanyszog vehstate vh pedestrian;
-global all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian;
+% global all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian;
 
 OK = false;
 num_sim = 0;
@@ -50,8 +50,8 @@ end
 disp(['Összes szimuláció: ', num2str(num_sim)]);
 disp(['Jó szimulációk: ', num2str(num_good_sim)]);
 disp(['A sikeres szimulációk aránya: ', num2str(num_good_sim/num_sim)]);
-disp('Az ideálistól eltérő események:');
-disp(warnings)
+% disp('Az ideálistól eltérő események:');
+% disp(warnings)
 
 % Save all the simulation results
 % save all_simulation_results.mat all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian;
