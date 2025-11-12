@@ -1,3 +1,5 @@
+% SCENARIO 2
+
 %{
 This is the main script to control the different simulations and evaluate them.
 %}

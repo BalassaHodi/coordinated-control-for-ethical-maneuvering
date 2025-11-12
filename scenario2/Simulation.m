@@ -1,3 +1,5 @@
+% SCENARIO 2
+
 %{
 This script runs the simulation for every timestep.
 %}

@@ -1,3 +1,5 @@
+% SCENARIO 2
+
 %{
 This function implements the path-planning layer of the coordinated control.
 The path-planning is created with RRT* algorithm on the created vehicleCostmap.

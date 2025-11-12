@@ -1,3 +1,5 @@
+% SCENARIO 2
+
 %{
 This function implements the lateral control design of the av. during the
 simulation.
