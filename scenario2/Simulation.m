@@ -16,6 +16,7 @@ This script runs the simulation for every timestep.
 
 clear;
 clear global;
+close all;
 clc;
 
 % Global variables
@@ -28,11 +29,13 @@ global dom_vmax;        % The maximum velocity of the dominant vehicle
 global sub_vmax;        % the maximum velcity of the subordinate vehicle
 global dom_vehsD;       % the states of the discrete ss model for the dominant vehicle
 global sub_vehsD;       % the states of the discrete ss model for the subordinate vehicle
-global vehstate;       % the array containing both vehicles states: [dom_x, dom_y, dom_psi, sub_x, sub_y, sub_psi]
+global vehstate;        % the array containing both vehicles states: [dom_x, dom_y, dom_psi, sub_x, sub_y, sub_psi]
 global dom_kormanyszog; % delta of dom. av.
 global sub_kormanyszog; % delta of sub. av.
 global dom_sebesseg;    % vx of dom. av.
 global sub_sebesseg;    % vx of sub. av.
+global pedestrian;      % [x,y] of the pedestrian
+global OK;
 
 
 % Initialize global variables
@@ -77,9 +80,21 @@ for t = 2:length(T)
     % The number of the current simulation step (display it to cmd wdw if needed)
     current_run = current_run + 1;
 
-    % JUST FOR DEBUGGING NOW
-    % refresh the states based on the vehicle dynamics
-    % FIRST for the dominant vehicle
+
+    % PATH PLANNER LAYER
+    % First generate path for the dominant vehicle
+    dom_palya = dom_palyagen(vehstate(t-1,:)); % THE CREATION OF THE FUNCTIONS ARE NEEDED
+
+    % Then generate path for the subordinate vehicle
+    %sub_palya = sub_palyagen(vehstate(t-1,:),dom_palya); % THE CREATION OF THE FUNCTIONS ARE NEEDED
+
+
+
+
+
+
+    % DOMINANT VEHICLE
+    % Refresh the states based on vehicle dynamics
     seb = dom_v;
     korm = 0;
     v_x = seb;
@@ -92,6 +107,7 @@ for t = 2:length(T)
     D = [0;0];
     sysC = ss(A,B,C,D);
     sysD = c2d(sysC,Ts);
+
     % refresh the vector of states for the dominant discrete ss system
     dom_vehsD = sysD.A*dom_vehsD + sysD.B*korm;
 
@@ -100,9 +116,15 @@ for t = 2:length(T)
     vehstate(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate(t,3));
     vehstate(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate(t,3));
 
-    % SECOND for the subordinate vehicle
+    % Store the velocity and steering angle
+    dom_sebesseg(t) = v_x;
+    dom_kormanyszog(t) = korm;
+
+
+    % SUBORDINATE VEHICLE
+    % Refresh the states based on vehicle dynamics
     seb = sub_v;
-    korm = 0;
+    korm = 5*pi/180;
     v_x = seb;
     A = [(-C1*l1^2-C2*l2^2)/(J*v_x), (-C1*l1+C2*l2)/(J*v_x), 0;
          (-C1*l1+C2*l2)/(m*v_x)-v_x, (-C1-C2)/(m*v_x), 0;
@@ -113,6 +135,7 @@ for t = 2:length(T)
     D = [0;0];
     sysC = ss(A,B,C,D);
     sysD = c2d(sysC,Ts);
+
     % refresh the vector of states for the sub. discrete ss system
     sub_vehsD = sysD.A*sub_vehsD + sysD.B*korm;
 
@@ -120,6 +143,10 @@ for t = 2:length(T)
     vehstate(t,6) = sub_vehsD(3);
     vehstate(t,4) = vehstate(t-1,4) - v_x*Ts*cos(vehstate(t,6));
     vehstate(t,5) = vehstate(t-1,5) - v_x*Ts*sin(vehstate(t,6));
+
+    % Store the velocity and steering angle
+    sub_sebesseg(t) = v_x;
+    sub_kormanyszog(t) = korm;
 end
 
 figure;
