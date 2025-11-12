@@ -2,7 +2,7 @@
 This script runs the simulation for every timestep.
 %}
 
-clearvars -except num_sim num_good_sim all_warnings;
+clearvars -except num_sim num_good_sim all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian;
 close all;
 % clc;
 
@@ -17,8 +17,10 @@ global kormanyszog; % [1-by-m double] (m: the steering angles actually given to 
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
 global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
-global warnings;    % [1-by-m cell] (m: the number of warnings for later purposes)
+global warnings;    % [n-by-4 cell] (n: the number of warnings in a single simulation) (the columns: Code, Type, TimeStep, Description)
 global emergency;   % [boolean] (true if the emergency situation happens (go straight with max deceleration)
+global vh;          % [double] (the constant longitudinal velocity of the hv. in m/s)
+global pedestrian;  % [1-by-2 double] (the x-y position of the pedestrian in m)
 
 % The steps
 steps = 15;
@@ -61,8 +63,8 @@ sebesseg(1) = va;                % av. initial velocity in m/s
 
 % The simulation (loop that runs for every timestep)
 for t = 2:length(T)
-    % The number of the current simulation step (display it to cmd wdw)
-    current_run = current_run + 1
+    % The number of the current simulation step (display it to cmd wdw if needed)
+    current_run = current_run + 1;
 
     % Generate the path that the av. should follow
     palya = palyagen(vehstate(t-1,:));
@@ -70,7 +72,7 @@ for t = 2:length(T)
     % If there's an error during the generation of the "palya", emergency scenario is true
     if ~OK
         emergency = true;
-        warnings{end+1} = sprintf('(%d): Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!', t-1);
+        warnings(end+1,:) = {1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
     end
     
 
@@ -85,8 +87,9 @@ for t = 2:length(T)
         beq = [];
         lb = -15*pi/180;    % the lower bound of the steering angle
         ub=15*pi/180;       % the upper bound of the steering angle
+        options = optimoptions('fmincon','Display','off');
         % based on the function created in 'fun.m', the fmincon minimalizes the cost of that function, and returns the optimized delta
-        [delta,FVAL,EXITFLAG] = fmincon(@fun,0,A,b,Aeq,beq,lb,ub);
+        [delta,FVAL,EXITFLAG] = fmincon(@fun,0,A,b,Aeq,beq,lb,ub,[],options);
         % the final steering angle (that goes to the actuator) is calculated (to smooth the steering angle)
         korm = 0.8*delta + 0.2*kormanyszog(t-1);
     else
@@ -95,7 +98,7 @@ for t = 2:length(T)
 
     % Optimize the velocity of the vehicle
     if emergency
-        disp('Vészhelyzet van!')
+        % disp('Vészhelyzet van!');
         % maximum deceleration is applied
         seb = max(round(sebesseg(t-1)*3.6)-3,0.01);
     else
@@ -130,34 +133,14 @@ for t = 2:length(T)
     kormanyszog(t) = korm;
 end
 
-% Save the results (every variable, if needed)
-% save results;
 
-% Create figures
-% The creation of the figures are insidethe palyagen.m function
-%{
-load results;
-
-for i = 1:length(vehstate)
-    if vehstate(i,1)<25
-        figure;
-        palyagen(vehstate(i,:));
-    end;
-end;
-
-figure;
-plot([0:Ts:15*Ts],[sebesseg(1) sebesseg(2:length(sebesseg))]*3.6)
-
-figure;
-plot([0:Ts:15*Ts],[0 kormanyszog(2:length(kormanyszog))]*180/pi)
-%}
 
 % Create the figure of the velocity profile, and the steering angle over time
 % And also create the actual path of the car
-if OK
-    run plot_simit.m
-    figure;
-    plot(vehstate(:,1),vehstate(:,2), 'o-b');
-    xlim([0, 30]);
-    ylim([0,10]);
-end
+% if OK
+%     run plot_simit.m
+%     figure;
+%     plot(vehstate(:,1),vehstate(:,2), 'o-b');
+%     xlim([0, 30]);
+%     ylim([0,10]);
+% end

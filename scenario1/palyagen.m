@@ -18,6 +18,7 @@ global all_palya;
 global t;
 global warnings;
 global emergency;
+global pedestrian;
 
 % Clear the palya from the previous iteration
 palya = double.empty();
@@ -42,6 +43,7 @@ costmap.CollisionChecker = ccConfig;
 occupiedVal = 1;
 xyPoint1 = [10,2.5]; 
 setCosts(costmap,xyPoint1,occupiedVal);
+pedestrian = xyPoint1;
 
 % The hv. in the other lane based on its current x_hv position from the input
 % The hv. is created by inflating 3 points
@@ -73,7 +75,7 @@ OK = checkFree(costmap, [startPose(1), startPose(2), startPose(3)]);
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
 if ~OK
-    disp('A startPose nem megfelelő, így az előző referenciapálya használata...');   
+    % disp('A startPose nem megfelelő, így az előző referenciapálya használata...');   
 
     % Work with the previous path
     if t > 2
@@ -113,11 +115,11 @@ if ~OK
 
     if pathFound
         emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        % disp('Az előző referenciapálya van felhasználva.');
         all_palya{t-1} = palya;
         kimenet = palya;
         clear costmap;
-        warnings{end+1} = sprintf('(%d): A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.',t-1);
+        warnings(end+1,:) = {2, 'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
         return
     end
 else
@@ -140,8 +142,8 @@ if ~pathFound && ~OK
     end
 
     kimenet = palya;
-    disp('Nem tudott létrejönni referenciapálya');
-    warnings{end+1} = sprintf('(%d): A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.',t-1);
+    % disp('Nem tudott létrejönni referenciapálya');
+    warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
 
@@ -196,17 +198,17 @@ for attempt = 1:maxAttempts
         pathFound = true;
         emergency = false;
         if attempt ~= 1
-            warnings{end+1} = sprintf('(%d): A referenciapálya létrehozása %d. iterációra történt meg.', t-1, attempt);
+            warnings(end+1,:) = {4, 'Info', t-1, sprintf('A referenciapálya létrehozása %d. iterációra történt meg.', attempt)};
         end
         break;
     end
 
-    disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
+    % disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    disp('Előző referenciapálya használata...');
+    % disp('Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
         % Get the previous palya
@@ -245,11 +247,11 @@ if ~pathFound
 
     if pathFound
         emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        % disp('Az előző referenciapálya van felhasználva.');
         all_palya{t-1} = palya;
         kimenet = palya;
         clear costmap;
-        warnings{end+1} = sprintf('(%d): Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.',t-1);
+        warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
         return
     end
 end
@@ -270,8 +272,8 @@ if ~pathFound
     end
 
     kimenet = palya;
-    disp('Nem tudott létrejönni referenciapálya');
-    warnings{end+1} = sprintf('(%d): Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.',t-1);
+    % disp('Nem tudott létrejönni referenciapálya');
+    warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
 
@@ -279,8 +281,8 @@ end
 
 % If the path was created by RRT in the actual timestep
 % Plot the actual planned path (if there was)
-figure;
-plot(planner)
+% figure;
+% plot(planner)
 
 
 % Create the output vector
@@ -298,7 +300,7 @@ end
 removedIndices = setdiff(1:length(palya(:,1)),ia);
 for i = 1:length(removedIndices)
     palya(removedIndices(i),:) = [];
-    warnings{end+1} = sprintf('(%d): Törölni kellett a %d. sort a pályából.',t-1,removedIndices(i));
+    warnings(end+1,:) = {7, 'Info', t-1, sprintf('Törölni kellett a %d. sort a pályából.',removedIndices(i))};
 end
 
 % Store the palya
