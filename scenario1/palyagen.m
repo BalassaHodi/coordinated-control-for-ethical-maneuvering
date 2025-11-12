@@ -75,7 +75,7 @@ OK = checkFree(costmap, [startPose(1), startPose(2), startPose(3)]);
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
 if ~OK
-    disp('A startPose nem megfelelő, így az előző referenciapálya használata...');   
+    % disp('A startPose nem megfelelő, így az előző referenciapálya használata...');   
 
     % Work with the previous path
     if t > 2
@@ -115,7 +115,7 @@ if ~OK
 
     if pathFound
         emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        % disp('Az előző referenciapálya van felhasználva.');
         all_palya{t-1} = palya;
         kimenet = palya;
         clear costmap;
@@ -142,7 +142,7 @@ if ~pathFound && ~OK
     end
 
     kimenet = palya;
-    disp('Nem tudott létrejönni referenciapálya');
+    % disp('Nem tudott létrejönni referenciapálya');
     warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
@@ -203,12 +203,12 @@ for attempt = 1:maxAttempts
         break;
     end
 
-    disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
+    % disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    disp('Előző referenciapálya használata...');
+    % disp('Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
         % Get the previous palya
@@ -247,7 +247,7 @@ if ~pathFound
 
     if pathFound
         emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        % disp('Az előző referenciapálya van felhasználva.');
         all_palya{t-1} = palya;
         kimenet = palya;
         clear costmap;
@@ -272,7 +272,7 @@ if ~pathFound
     end
 
     kimenet = palya;
-    disp('Nem tudott létrejönni referenciapálya');
+    % disp('Nem tudott létrejönni referenciapálya');
     warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
@@ -281,8 +281,8 @@ end
 
 % If the path was created by RRT in the actual timestep
 % Plot the actual planned path (if there was)
-figure;
-plot(planner)
+% figure;
+% plot(planner)
 
 
 % Create the output vector

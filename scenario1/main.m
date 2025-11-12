@@ -12,7 +12,7 @@ global warnings sebesseg kormanyszog vehstate vh pedestrian;
 OK = false;
 num_sim = 0;
 num_good_sim = 0;
-simulations = 5;
+simulations = 10;
 all_warnings = {};
 all_sebesseg = {};
 all_kormanyszog = {};
@@ -23,6 +23,7 @@ all_pedestrian = {};
 for i=1:simulations
 %while ~OK
     num_sim = num_sim + 1;
+    disp(['Simulation ', num2str(num_sim), ' is running...'])
     run Simulation.m
     
     if ~isempty(warnings)
@@ -43,7 +44,9 @@ for i=1:simulations
         warning(['Hiba a ', num2str(num_sim), '. szimulációban.']);
     else
         num_good_sim = num_good_sim + 1;
+        disp('A szimuláció sikeresen lefutott.')
     end
+    disp(' ');
 end
 
 % disp(['Sikeres szimuláció. Szimulációk száma: ', num2str(num_sim)]);
