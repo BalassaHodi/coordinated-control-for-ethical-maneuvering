@@ -54,4 +54,4 @@ disp(['A sikeres szimulációk aránya: ', num2str(num_good_sim/num_sim)]);
 % disp(warnings)
 
 % Save all the simulation results
-% save all_simulation_results.mat all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian;
+% save all_simulation_results.mat all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian num_sim num_good_sim;
