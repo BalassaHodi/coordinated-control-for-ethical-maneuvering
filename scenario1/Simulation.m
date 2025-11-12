@@ -2,7 +2,7 @@
 This script runs the simulation for every timestep.
 %}
 
-clearvars -except num_sim num_good_sim all_warnings;
+clearvars -except num_sim num_good_sim all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian;
 close all;
 % clc;
 
@@ -19,6 +19,8 @@ global va_max;      % [double] the maximum velocity of the av. in m/s
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
 global warnings;    % [n-by-4 cell] (n: the number of warnings in a single simulation) (the columns: Code, Type, TimeStep, Description)
 global emergency;   % [boolean] (true if the emergency situation happens (go straight with max deceleration)
+global vh;
+global pedestrian;
 
 % The steps
 steps = 15;

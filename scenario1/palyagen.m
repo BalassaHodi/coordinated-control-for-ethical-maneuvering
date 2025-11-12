@@ -18,6 +18,7 @@ global all_palya;
 global t;
 global warnings;
 global emergency;
+global pedestrian;
 
 % Clear the palya from the previous iteration
 palya = double.empty();
@@ -42,6 +43,7 @@ costmap.CollisionChecker = ccConfig;
 occupiedVal = 1;
 xyPoint1 = [10,2.5]; 
 setCosts(costmap,xyPoint1,occupiedVal);
+pedestrian = xyPoint1;
 
 % The hv. in the other lane based on its current x_hv position from the input
 % The hv. is created by inflating 3 points
