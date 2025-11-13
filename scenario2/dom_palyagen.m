@@ -21,6 +21,7 @@ global dom_palya;
 global dom_warnings;
 global dom_emergency;
 global t;
+global dom_costmap;
 
 % Clear the palya from the previous iteration
 dom_palya = double.empty();
@@ -31,38 +32,38 @@ mapWidth = 30;
 mapLength = 10;
 costVal = 0;
 cellSize = 0.5;
-costmap = vehicleCostmap(mapWidth,mapLength,costVal,'CellSize',cellSize);
+dom_costmap = vehicleCostmap(mapWidth,mapLength,costVal,'CellSize',cellSize);
 
 
 % Create the inflated area of the obstacles based on the dimensions of the dominant vehicle
 vehicleDims = vehicleDimensions(4.5,1.7);   % 4.5 m long, 1.7 m wide
 numCircles = 3;
 ccConfig = inflationCollisionChecker(vehicleDims,numCircles);
-costmap.CollisionChecker = ccConfig;
+dom_costmap.CollisionChecker = ccConfig;
 
 
 % Create the obstacles
 % The pedestrian in the middle of the road
 occupiedVal = 1;
 xyPoint1 = [10,2.5];
-setCosts(costmap,xyPoint1,occupiedVal);
+setCosts(dom_costmap,xyPoint1,occupiedVal);
 pedestrian = xyPoint1;
 
 % The subordinate vehicle in the other lane
 xyPoint2 = [input(4)-2*cos(input(6)), input(5)-2*sin(input(6)); input(4), input(5); input(4)+2*cos(input(6)), input(5)+2*sin(input(6))];
-setCosts(costmap,xyPoint2,occupiedVal);
+setCosts(dom_costmap,xyPoint2,occupiedVal);
 
 % The sides of the roads
 occupiedVal = 0.6;
 xyPoint3 = [(0:1:mapWidth)' 0*ones(31,1)];
-setCosts(costmap,xyPoint3,occupiedVal);
+setCosts(dom_costmap,xyPoint3,occupiedVal);
 occupiedVal = 0.6;
 xyPoint3 = [(0:1:mapWidth)' mapLength*ones(31,1)];
-setCosts(costmap,xyPoint3,occupiedVal);
+setCosts(dom_costmap,xyPoint3,occupiedVal);
 
 % Plot the costmap for debugging
 % figure;
-% plot(costmap);
+% plot(dom_costmap);
 
 
 
@@ -72,7 +73,7 @@ goalPose = dom_goal_pos;
 
 
 % Check the startpose
-dom_OK = checkFree(costmap,startPose);
+dom_OK = checkFree(dom_costmap,startPose);
 
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
@@ -104,7 +105,7 @@ if ~dom_OK
             % Create the new palya array while checking wether the poses are free
             for i = 2:(size(dom_previous_palya,1)-startIndex+2)
                 dom_palya(i,:) = dom_previous_palya(startIndex+i-2,:);
-                dom_OK = checkFree(costmap,[dom_palya(i,1), dom_palya(i,2), 360-dom_palya(i,3)*180/pi]);
+                dom_OK = checkFree(dom_costmap,[dom_palya(i,1), dom_palya(i,2), 360-dom_palya(i,3)*180/pi]);
                 if dom_OK
                     pathFound = true;
                 else
@@ -120,7 +121,7 @@ if ~dom_OK
         % disp('Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
-        clear costmap;
+        % clear dom_costmap;
         % dom_warnings(end+1,:) = {2,'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
         return
     end
@@ -186,7 +187,7 @@ with maximum deceleration.
 
 % IMPROVE PATH PLANNING
 % Create RRT* path planning algorithm
-planner = pathPlannerRRT(costmap,'MinTurningRadius',10,'ConnectionDistance',2,'GoalTolerance',[0.5,0.5,5]);
+planner = pathPlannerRRT(dom_costmap,'MinTurningRadius',10,'ConnectionDistance',2,'GoalTolerance',[0.5,0.5,5]);
 
 % Since RRT* is a probabilistic algorithm, if the path couldn't be created, try to create it again:
 maxAttempts = 10;
@@ -195,7 +196,7 @@ pathFound = false;
 for attempt = 1:maxAttempts
     refPath = plan(planner,startPose,goalPose);
 
-    dom_OK = checkPathValidity(refPath,costmap);
+    dom_OK = checkPathValidity(refPath,dom_costmap);
     if dom_OK
         pathFound = true;
         dom_emergency = false;
@@ -236,7 +237,7 @@ if ~pathFound
             % Create the new palya array while checking wether poses are free
             for i = 2:(size(dom_previous_palya,1)-startIndex+2)
                 dom_palya(i,:) = dom_previous_palya(startIndex+i-2,:);
-                dom_OK = checkFree(costmap,[dom_palya(i,1), dom_palya(i,2), 360-dom_palya(i,3)*180/pi]);
+                dom_OK = checkFree(dom_costmap,[dom_palya(i,1), dom_palya(i,2), 360-dom_palya(i,3)*180/pi]);
                 if dom_OK
                     pathFound = true;
                 else
@@ -252,7 +253,7 @@ if ~pathFound
         % disp('Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
-        clear costmap;
+        % clear dom_costmap;
         % dom_warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
         return
     end
@@ -311,7 +312,7 @@ dom_all_palya{t-1} = dom_palya;
 kimenet = dom_palya;
 
 % Clear the costmap
-clear costmap;      % IS THIS REALLY NEEDED?
+% clear dom_costmap;      % IS THIS REALLY NEEDED?
 
 
 

@@ -1,8 +1,8 @@
 % SCENARIO 2
 
 %{
-This function implements the longitudinal control design of the av. during
-the simulation.
+This function implements the longitudinal control design of the dominant vehicle
+during the simulation.
 The constaints of the velocity is that in every time step it can only
 change by 3 km/h.
 The approach here is that the veolcity shall remain the same (so no
@@ -15,17 +15,18 @@ The input:
 %}
 
 
-function seb = sebopt(delta)
+function dom_seb = dom_sebopt(delta)
 
 % Global variables
-global OK;
-global vehsD vehstate t;
-global palya;
-global costmap sebesseg;
-global va_max;
+global dom_vmax;
+global dom_sebesseg;
+global t;
+global dom_vehsD;
+global vehstate;
+global dom_costmap;
 
 
-% Vehicles constant parameters
+% Vehicle constant parameters
 C1 = 80000;     % cornering stiffness of front tires
 C2 = 120000;    % cornering stiffness of back tires
 l1 = 2.2;       % distance between COG and front axle
@@ -36,17 +37,16 @@ m = 1500;       % mass of the vehicle
 % Sample time
 Ts = 0.1;
 
-
-% The for loop goes through the velocties from act_vel+3 to act_vel-3 (in km/h)
-for seb = min(va_max, round(sebesseg(t-1)*3.6) + 3):-1:max(0, round(sebesseg(t-1)*3.6) - 3)
-    % If the velocity is 0, than it shall be 0.01
-    if seb < 0.1
-        seb = 0.01;
+% The for loop goes through the velocities from act_vel+3 to act_vel-3 (in km/h)
+for dom_seb = min(dom_vmax, round(dom_sebesseg(t-1)*3.6)+3):-1:max(0,round(dom_sebesseg(t-1)*3.6)-3)
+    % if the velocity is 0, than it shall be 0.01
+    if dom_seb < 0.1
+        dom_seb = 0.01;
         break
     end
 
     % Update the state space with the velocity
-    v_x = seb/3.6;
+    v_x = dom_seb/3.6;
     A = [(-C1*l1^2-C2*l2^2)/(J*v_x), (-C1*l1+C2*l2)/(J*v_x), 0;
          (-C1*l1+C2*l2)/(m*v_x)-v_x, (-C1-C2)/(m*v_x), 0;
          0, 1, 0];
@@ -58,16 +58,16 @@ for seb = min(va_max, round(sebesseg(t-1)*3.6) + 3):-1:max(0, round(sebesseg(t-1
     sysD = c2d(sysC,Ts);
 
     % Update the local vector of states
-    vehsD_ = sysD.A*vehsD + sysD.B*delta;
+    vehsD_ = sysD.A*dom_vehsD + sysD.B*delta;
 
-    % Update the states of the av.
-    vehstate_(t,3) = vehsD_(1);
+    % Update the local array of states of the dominant vehicle
+    vehstate_(t,3) + vehsD_(1);
     vehstate_(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate_(t,3));
     vehstate_(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate_(t,3));
 
     % Check wether the velocity is good or not
     % The angle shall be converted into degrees and according to the documentation it is positive in the clockwise direction
-    if checkFree(costmap,[vehstate_(t,1), vehstate_(t,2), -vehstate_(t,3)*180/pi]) == 1
+    if checkFree(dom_costmap,[vehstate_(t,1), vehstate_(t,2), -vehstate_(t,3)*180/pi]) == 1
         % If good, then break the loop and the output will be the velocity
         break
     end

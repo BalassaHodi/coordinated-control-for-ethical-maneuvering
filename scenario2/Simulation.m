@@ -41,6 +41,7 @@ global dom_all_palya;
 global t;
 global dom_warnings;
 global dom_palya;
+global dom_costmap;
 
 % Initialize global variables
 dom_init_pos = [1, 2.5, 0];
@@ -103,7 +104,6 @@ for t = 2:length(T)
 
 
     % PATH TRACING LAYER
-    % LATERAL CONTROL
     % Lateral control of the dominant vehicle
     if ~dom_emergency
         % Optimize the steering angle of the vehicle
@@ -121,6 +121,17 @@ for t = 2:length(T)
     else
         dom_korm = 0;
     end
+
+    % Longitudnal control of the dominant vehicle
+    if dom_emergency
+        % disp('Vészhelyzet van!');
+        % maximum deceleration is applied
+        dom_seb = max(round(dom_sebesseg(t-1)*3.6)-3, 0.01);
+    else
+        % calculate the optimal velocity of the vehicle
+        dom_seb = dom_sebopt(dom_korm);
+    end
+
 
 
 
