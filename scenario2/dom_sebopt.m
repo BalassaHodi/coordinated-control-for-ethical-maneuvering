@@ -61,7 +61,7 @@ for dom_seb = min(dom_vmax, round(dom_sebesseg(t-1)*3.6)+3):-1:max(0,round(dom_s
     vehsD_ = sysD.A*dom_vehsD + sysD.B*delta;
 
     % Update the local array of states of the dominant vehicle
-    vehstate_(t,3) + vehsD_(1);
+    vehstate_(t,3) = vehsD_(1);
     vehstate_(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate_(t,3));
     vehstate_(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate_(t,3));
 

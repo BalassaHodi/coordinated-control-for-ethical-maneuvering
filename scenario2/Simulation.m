@@ -85,7 +85,7 @@ sub_sebesseg(1) = sub_v;    % in m/s
 % The simulation (loop that runs for every timestep)
 for t = 2:length(T)
     % The number of the current simulation step (display it to cmd wdw if needed)
-    current_run = current_run + 1;
+    current_run = current_run + 1
 
 
     % PATH PLANNER LAYER
@@ -124,7 +124,7 @@ for t = 2:length(T)
 
     % Longitudnal control of the dominant vehicle
     if dom_emergency
-        % disp('Vészhelyzet van!');
+        disp('Vészhelyzet van!');
         % maximum deceleration is applied
         dom_seb = max(round(dom_sebesseg(t-1)*3.6)-3, 0.01);
     else
@@ -140,9 +140,7 @@ for t = 2:length(T)
 
     % DOMINANT VEHICLE
     % Refresh the states based on vehicle dynamics
-    seb = dom_v;
-    korm = 0;
-    v_x = seb;
+    v_x = dom_seb/3.6;
     A = [(-C1*l1^2-C2*l2^2)/(J*v_x), (-C1*l1+C2*l2)/(J*v_x), 0;
          (-C1*l1+C2*l2)/(m*v_x)-v_x, (-C1-C2)/(m*v_x), 0;
          0, 1, 0];
@@ -154,7 +152,7 @@ for t = 2:length(T)
     sysD = c2d(sysC,Ts);
 
     % refresh the vector of states for the dominant discrete ss system
-    dom_vehsD = sysD.A*dom_vehsD + sysD.B*korm;
+    dom_vehsD = sysD.A*dom_vehsD + sysD.B*dom_korm;
 
     % calculate the elements of vehstate
     vehstate(t,3) = dom_vehsD(1);
@@ -163,13 +161,13 @@ for t = 2:length(T)
 
     % Store the velocity and steering angle
     dom_sebesseg(t) = v_x;
-    dom_kormanyszog(t) = korm;
+    dom_kormanyszog(t) = dom_korm;
 
 
     % SUBORDINATE VEHICLE
     % Refresh the states based on vehicle dynamics
     seb = sub_v;
-    korm = 5*pi/180;
+    korm = 0;
     v_x = seb;
     A = [(-C1*l1^2-C2*l2^2)/(J*v_x), (-C1*l1+C2*l2)/(J*v_x), 0;
          (-C1*l1+C2*l2)/(m*v_x)-v_x, (-C1-C2)/(m*v_x), 0;

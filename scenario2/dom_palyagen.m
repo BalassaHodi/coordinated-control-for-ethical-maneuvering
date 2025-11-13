@@ -78,7 +78,7 @@ dom_OK = checkFree(dom_costmap,startPose);
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
 if ~dom_OK
-    % disp('A startPose nem megfelelő, így az előző referenciapálya használata...');
+    disp('A startPose nem megfelelő, így az előző referenciapálya használata...');
 
     % Work with the previous path
     if t > 2
@@ -118,7 +118,7 @@ if ~dom_OK
 
     if pathFound
         dom_emergency = false;
-        % disp('Az előző referenciapálya van felhasználva.');
+        disp('Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
         % clear dom_costmap;
@@ -145,7 +145,7 @@ if ~pathFound && ~dom_OK
     end
 
     kimenet = dom_palya;
-    % disp('Nem tudott létrejönni referenciapálya');
+    disp('Nem tudott létrejönni referenciapálya');
     % dom_warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
@@ -206,12 +206,12 @@ for attempt = 1:maxAttempts
         break
     end
 
-    % disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
+    disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    % disp('Előző referenciapálya használata...');
+    disp('Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
         % Get the previous palya
@@ -223,7 +223,7 @@ if ~pathFound
         % Check where the startPose is now
         dom_palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0];
         for i = 1:size(dom_previous_palya,1)
-            if dom_palya(1,1) < previous_palya(i,1)
+            if dom_palya(1,1) < dom_previous_palya(i,1)
                 startIndex = i;
                 startPose_good = true;
                 break
@@ -250,7 +250,7 @@ if ~pathFound
 
     if pathFound
         dom_emergency = false;
-        % disp('Az előző referenciapálya van felhasználva.');
+        disp('Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
         % clear dom_costmap;
@@ -275,7 +275,7 @@ if ~pathFound
     end
 
     kimenet = dom_palya;
-    % disp('Nem tudott létrejönni referenciapálya');
+    disp('Nem tudott létrejönni referenciapálya');
     % dom_warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
@@ -283,8 +283,8 @@ end
 
 % If the path was created by RRT in the actual timestep
 % Plot the actual planned path (if there was)
-% figure;
-% plot(planner)
+figure;
+plot(planner)
 
 
 % Create the output vector
