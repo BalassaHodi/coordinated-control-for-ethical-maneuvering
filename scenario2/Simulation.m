@@ -35,7 +35,9 @@ global sub_kormanyszog; % delta of sub. av.
 global dom_sebesseg;    % vx of dom. av.
 global sub_sebesseg;    % vx of sub. av.
 global pedestrian;      % [x,y] of the pedestrian
-global OK;
+global dom_OK;
+global dom_all_palya;
+global t;
 
 
 % Initialize global variables
@@ -53,6 +55,8 @@ steps = ceil(((dom_goal_pos(1)-dom_init_pos(1))/(dom_vmax/3.6))/Ts);     % Calcu
 T = 0:Ts:steps*Ts;  % The times belonging to the time indices
 current_run = 0;    % number of simulation steps in the for loop
 
+% Initialize some global variables
+dom_all_palya = cell(steps,1);
 
 % Vehicles constant parameters - for both av.
 C1 = 80000;     % cornering stiffness of front tires
@@ -83,7 +87,7 @@ for t = 2:length(T)
 
     % PATH PLANNER LAYER
     % First generate path for the dominant vehicle
-    dom_palya = dom_palyagen(vehstate(t-1,:)); % THE CREATION OF THE FUNCTIONS ARE NEEDED
+    dom_palya = dom_palyagen(vehstate(t-1,:));
 
     % Then generate path for the subordinate vehicle
     %sub_palya = sub_palyagen(vehstate(t-1,:),dom_palya); % THE CREATION OF THE FUNCTIONS ARE NEEDED
