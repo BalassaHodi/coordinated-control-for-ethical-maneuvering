@@ -22,9 +22,11 @@ global dom_warnings;
 global dom_emergency;
 global t;
 global dom_costmap;
+global danger;
 
 % Clear the palya from the previous iteration
 dom_palya = double.empty();
+danger = false;
 
 
 % Create the costmap
@@ -121,8 +123,10 @@ if ~dom_OK
         disp('Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
-        % clear dom_costmap;
         % dom_warnings(end+1,:) = {2,'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
+
+        % If the planned path goes to the other lane, then danger situation is active
+        danger = any(dom_palya(:,2) >= 4);
         return
     end
 else
@@ -147,6 +151,9 @@ if ~pathFound && ~dom_OK
     kimenet = dom_palya;
     disp('Nem tudott létrejönni referenciapálya');
     % dom_warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
+
+    % If the planned path goes to the other lane, then danger situation is active
+    danger = any(dom_palya(:,2) >= 4);
     return
 end
 
@@ -253,8 +260,10 @@ if ~pathFound
         disp('Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
-        % clear dom_costmap;
         % dom_warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
+
+        % If the planned path goes to the other lane, then danger situation is active
+        danger = any(dom_palya(:,2) >= 4);
         return
     end
 end
@@ -277,6 +286,9 @@ if ~pathFound
     kimenet = dom_palya;
     disp('Nem tudott létrejönni referenciapálya');
     % dom_warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
+
+    % If the planned path goes to the other lane, then danger situation is active
+    danger = any(dom_palya(:,2) >= 4);
     return
 end
 
@@ -311,8 +323,8 @@ dom_all_palya{t-1} = dom_palya;
 % The output is the reference path
 kimenet = dom_palya;
 
-% Clear the costmap
-% clear dom_costmap;      % IS THIS REALLY NEEDED?
+% If the planned path goes to the other lane, then danger situation is active
+danger = any(dom_palya(:,2) >= 4);
 
 
 

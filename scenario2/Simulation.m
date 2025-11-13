@@ -42,6 +42,7 @@ global t;
 global dom_warnings;
 global dom_palya;
 global dom_costmap;
+global danger;
 
 % Initialize global variables
 dom_init_pos = [1, 2.5, 0];
