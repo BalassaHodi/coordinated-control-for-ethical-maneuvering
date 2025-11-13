@@ -47,9 +47,8 @@ dom_costmap.CollisionChecker = ccConfig;
 % Create the obstacles
 % The pedestrian in the middle of the road
 occupiedVal = 1;
-xyPoint1 = [10,2.5];
+xyPoint1 = pedestrian;
 setCosts(dom_costmap,xyPoint1,occupiedVal);
-pedestrian = xyPoint1;
 
 % The subordinate vehicle in the other lane
 xyPoint2 = [input(4)-2*cos(input(6)), input(5)-2*sin(input(6)); input(4), input(5); input(4)+2*cos(input(6)), input(5)+2*sin(input(6))];

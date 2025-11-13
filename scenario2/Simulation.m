@@ -36,12 +36,18 @@ global dom_sebesseg;    % vx of dom. av.
 global sub_sebesseg;    % vx of sub. av.
 global pedestrian;      % [x,y] of the pedestrian
 global dom_OK;
+global sub_OK;
 global dom_emergency;
+global sub_emergency;
 global dom_all_palya;
+global sub_all_palya;
 global t;
 global dom_warnings;
+global sub_warnings;
 global dom_palya;
+global sub_palya;
 global dom_costmap;
+global sub_costmap;
 global danger;
 
 % Initialize global variables
@@ -51,6 +57,7 @@ sub_init_pos = [20, 7.5, 0];
 sub_goal_pos = [5, 7.5, 0];
 dom_vmax = 60;
 sub_vmax = 40;
+pedestrian = [10,2.5];
 
 
 % Simulation parameters
@@ -61,6 +68,12 @@ current_run = 0;    % number of simulation steps in the for loop
 
 % Initialize some global variables
 dom_all_palya = cell(steps,1);
+sub_all_palya = cell(steps,1);
+dom_warnings = {};
+sub_warnings = {};
+dom_emergency = false;
+sub_emergency = false;
+danger = false;
 
 % Vehicles constant parameters - for both av.
 C1 = 80000;     % cornering stiffness of front tires
