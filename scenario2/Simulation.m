@@ -36,9 +36,11 @@ global dom_sebesseg;    % vx of dom. av.
 global sub_sebesseg;    % vx of sub. av.
 global pedestrian;      % [x,y] of the pedestrian
 global dom_OK;
+global dom_emergency;
 global dom_all_palya;
 global t;
-
+global dom_warnings;
+global dom_palya;
 
 % Initialize global variables
 dom_init_pos = [1, 2.5, 0];
@@ -92,6 +94,34 @@ for t = 2:length(T)
     % Then generate path for the subordinate vehicle
     %sub_palya = sub_palyagen(vehstate(t-1,:),dom_palya); % THE CREATION OF THE FUNCTIONS ARE NEEDED
 
+    
+    % If there's ab error during the generation of the dominant palya, emergency scenario is true
+    if ~dom_OK
+        dom_emergency = true;
+        % dom_warnings(end+1,:) = {1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
+    end
+
+
+    % PATH TRACING LAYER
+    % LATERAL CONTROL
+    % Lateral control of the dominant vehicle
+    if ~dom_emergency
+        % Optimize the steering angle of the vehicle
+        A = [];
+        b = [];
+        Aeq = [];
+        beq = [];
+        lb = -15*pi/180;
+        ub = 15*pi/180;
+        options = optimoptions('fmincon','Display','off');
+        % based on the function created in dom_fun.m, the fmincon minimalizes the cost of that function, and returns the optimized delta
+        [dom_delta,FVAL,EXITFLAG] = fmincon(@dom_fun,0,A,b,Aeq,beq,lb,ub,[],options);
+        % the final steering angle (that goes to the actuator) is calculated (to smooth the steering angle)
+        dom_korm = 0.8*dom_delta + 0.2*dom_kormanyszog(t-1);
+    else
+        dom_korm = 0;
+    end
+
 
 
 
@@ -116,7 +146,7 @@ for t = 2:length(T)
     dom_vehsD = sysD.A*dom_vehsD + sysD.B*korm;
 
     % calculate the elements of vehstate
-    vehstate(t,3) = dom_vehsD(3);
+    vehstate(t,3) = dom_vehsD(1);
     vehstate(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate(t,3));
     vehstate(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate(t,3));
 
@@ -144,7 +174,7 @@ for t = 2:length(T)
     sub_vehsD = sysD.A*sub_vehsD + sysD.B*korm;
 
     % calculate the elements of vehstate
-    vehstate(t,6) = sub_vehsD(3);
+    vehstate(t,6) = sub_vehsD(1);
     vehstate(t,4) = vehstate(t-1,4) - v_x*Ts*cos(vehstate(t,6));
     vehstate(t,5) = vehstate(t-1,5) - v_x*Ts*sin(vehstate(t,6));
 
