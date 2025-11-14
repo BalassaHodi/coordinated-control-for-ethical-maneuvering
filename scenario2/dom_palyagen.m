@@ -79,7 +79,7 @@ dom_OK = checkFree(dom_costmap,startPose);
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
 if ~dom_OK
-    disp('A startPose nem megfelelő, így az előző referenciapálya használata...');
+    disp('[DOM] A startPose nem megfelelő, így az előző referenciapálya használata...');
 
     % Work with the previous path
     if t > 2
@@ -119,7 +119,7 @@ if ~dom_OK
 
     if pathFound
         dom_emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        disp('[DOM] Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
         % dom_warnings(end+1,:) = {2,'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
@@ -148,7 +148,7 @@ if ~pathFound && ~dom_OK
     end
 
     kimenet = dom_palya;
-    disp('Nem tudott létrejönni referenciapálya');
+    disp('[DOM] Nem tudott létrejönni referenciapálya');
     % dom_warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
 
     % If the planned path goes to the other lane, then danger situation is active
@@ -212,12 +212,12 @@ for attempt = 1:maxAttempts
         break
     end
 
-    disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
+    disp(['[DOM] Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    disp('Előző referenciapálya használata...');
+    disp('[DOM] Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
         % Get the previous palya
@@ -256,7 +256,7 @@ if ~pathFound
 
     if pathFound
         dom_emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        disp('[DOM] Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
         % dom_warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
@@ -283,7 +283,7 @@ if ~pathFound
     end
 
     kimenet = dom_palya;
-    disp('Nem tudott létrejönni referenciapálya');
+    disp('[DOM] Nem tudott létrejönni referenciapálya');
     % dom_warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
 
     % If the planned path goes to the other lane, then danger situation is active

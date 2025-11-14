@@ -39,7 +39,7 @@ if ~danger
         idx = idx + 1;
     end
     kimenet = sub_palya;
-    % disp('Nincs veszély.');
+    disp('[SUB] Nincs veszély.');
     return
 end
 
@@ -77,10 +77,16 @@ occupiedVal = 0.6;
 xyPoint3 = [(0:1:mapWidth)' mapLength*ones(31,1)];
 setCosts(sub_costmap,xyPoint3,occupiedVal);
 
-% The 4 ahead points of the reference path of the dominant vehicle
-if size(other_palya,1) >= 5 
+% The ahead points of the reference path of the dominant vehicle
+if size(other_palya,1) >= 7 
     occupiedVal = 1;
-    xyPoint4 = [other_palya(2,1), other_palya(2,2); other_palya(3,1), other_palya(3,2); other_palya(4,1), other_palya(4,2); other_palya(5,1), other_palya(5,2)];
+    xyPoint4 = [
+        other_palya(2,1), other_palya(2,2);
+        other_palya(3,1), other_palya(3,2);
+        other_palya(4,1), other_palya(4,2);
+        other_palya(5,1), other_palya(5,2);
+        other_palya(6,1), other_palya(6,2);
+        other_palya(7,1), other_palya(7,2)];
     setCosts(sub_costmap,xyPoint4,occupiedVal);
 end
 
@@ -101,7 +107,7 @@ sub_OK = checkFree(sub_costmap,[startPose(1), startPose(2), startPose(3)+180]); 
 % If the startPose is bad, than the plan function doesn't work, so we have 
 % to use the previous path for safety
 if ~sub_OK
-    disp('A startPose nem megfelelő, így az előző referenciapálya használata...');
+    disp('[SUB] A startPose nem megfelelő, így az előző referenciapálya használata...');
 
     % Work with the previous path
     if t > 2
@@ -141,7 +147,7 @@ if ~sub_OK
 
     if pathFound
         sub_emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        disp('[SUB] Az előző referenciapálya van felhasználva.');
         sub_all_palya{t-1} = sub_palya;
         kimenet = sub_palya;
         % sub_warnings(end+1,:) = {2,'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
@@ -167,7 +173,7 @@ if ~pathFound && ~sub_OK
     end
 
     kimenet = sub_palya;
-    disp('Nem tudott létrehönni referenciapálya.');
+    disp('[SUB] Nem tudott létrehönni referenciapálya.');
     % sub_warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
@@ -228,12 +234,12 @@ for attempt = 1:maxAttempts
         break
     end
 
-    disp(['Attempt ', num2str(attempt), ' failed, retrying...']);
+    disp(['[SUB] Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    disp('Előző referenciapálya használata...');
+    disp('[SUB] Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
         % Get the previous palya
@@ -272,7 +278,7 @@ if ~pathFound
 
     if pathFound
         sub_emergency = false;
-        disp('Az előző referenciapálya van felhasználva.');
+        disp('[SUB] Az előző referenciapálya van felhasználva.');
         sub_all_palya{t-1} = sub_palya;
         kimenet = sub_palya;
         % sub_warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
@@ -296,7 +302,7 @@ if ~pathFound
     end
 
     kimenet = sub_palya;
-    disp('Nem tudott létrehönni referenciapálya.');
+    disp('[SUB] Nem tudott létrejönni referenciapálya.');
     % sub_warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
@@ -331,3 +337,10 @@ sub_all_palya{t-1} = sub_palya;
 
 % The output is the reference path
 kimenet = sub_palya;
+
+
+%{
+One more improvement:
+The occupied cells shall be the actual position of the dominant vehicle and
+all the positions that goes to the other lane of the subordinate vehicle.
+%}
