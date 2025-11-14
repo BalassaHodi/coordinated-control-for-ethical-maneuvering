@@ -54,7 +54,7 @@ global danger;
 dom_init_pos = [1, 2.5, 0];
 dom_goal_pos = [25, 2.5, 0];
 sub_init_pos = [20, 7.5, 0];
-sub_goal_pos = [5, 7.5, 0];
+sub_goal_pos = [4, 7.5, 0];
 dom_vmax = 60;
 sub_vmax = 40;
 pedestrian = [10,2.5];
@@ -175,12 +175,19 @@ for t = 2:length(T)
         sub_korm = 0;
     end
 
+    % Longitudinal control of the subordinate vehicle 
+    if sub_emergency
+        disp('Vészhelyzet van!');
+        % maximum deceleration is applied
+        sub_seb = max(round(sub_sebesseg(t-1)*3.6)-3,0.01);
+    else
+        % Calculate the optimal velocity of the vehicle
+        sub_seb = sub_sebopt(sub_korm);
+    end
 
 
 
-
-
-
+    % REFRESH SS SYSTEM
     % DOMINANT VEHICLE
     % Refresh the states based on vehicle dynamics
     v_x = dom_seb/3.6;
@@ -209,9 +216,7 @@ for t = 2:length(T)
 
     % SUBORDINATE VEHICLE
     % Refresh the states based on vehicle dynamics
-    seb = sub_v;
-    korm = 0;
-    v_x = seb;
+    v_x = sub_seb/3.6;
     A = [(-C1*l1^2-C2*l2^2)/(J*v_x), (-C1*l1+C2*l2)/(J*v_x), 0;
          (-C1*l1+C2*l2)/(m*v_x)-v_x, (-C1-C2)/(m*v_x), 0;
          0, 1, 0];
@@ -223,7 +228,7 @@ for t = 2:length(T)
     sysD = c2d(sysC,Ts);
 
     % refresh the vector of states for the sub. discrete ss system
-    sub_vehsD = sysD.A*sub_vehsD + sysD.B*korm;
+    sub_vehsD = sysD.A*sub_vehsD + sysD.B*sub_korm;
 
     % calculate the elements of vehstate
     vehstate(t,6) = sub_vehsD(1);
@@ -232,7 +237,7 @@ for t = 2:length(T)
 
     % Store the velocity and steering angle
     sub_sebesseg(t) = v_x;
-    sub_kormanyszog(t) = korm;
+    sub_kormanyszog(t) = sub_korm;
 end
 
 figure;
