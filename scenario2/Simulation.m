@@ -102,6 +102,7 @@ for t = 2:length(T)
     current_run = current_run + 1
 
 
+
     % PATH PLANNER LAYER
     % First generate path for the dominant vehicle
     dom_palya = dom_palyagen(vehstate(t-1,:));
@@ -110,11 +111,20 @@ for t = 2:length(T)
     sub_palya = sub_palyagen(vehstate(t-1,:),dom_palya); % THE CREATION OF THE FUNCTIONS ARE NEEDED
 
     
-    % If there's ab error during the generation of the dominant palya, emergency scenario is true
+
+    % ACTIVATE EMERGENCY
+    % If there's an error during the generation of the dominant palya, emergency scenario is true
     if ~dom_OK
         dom_emergency = true;
         % dom_warnings(end+1,:) = {1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
     end
+
+    % If there's an error during the generation of the subordinate palya, emergency scenario is true
+    if ~sub_OK
+        sub_emergency = true;
+        % sub_warnings(end+1,:) = {1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
+    end
+
 
 
     % PATH TRACING LAYER
@@ -144,6 +154,25 @@ for t = 2:length(T)
     else
         % calculate the optimal velocity of the vehicle
         dom_seb = dom_sebopt(dom_korm);
+    end
+
+    
+    % Lateral control of the subordinate vehicle
+    if ~sub_emergency
+        % Optimize the steering angle of the vehicle
+        A = [];
+        b = [];
+        Aeq = [];
+        beq = [];
+        lb = -15*pi/180;
+        ub = 15*pi/180;
+        options = optimoptions('fmincon','Display','off');
+        % based on the function created in sub_fun.m, the fmincon minimalizes the cost of that funciton, and returns the optimized delta
+        [sub_delta,FVAL,EXITFLAG] = fmincon(@sub_fun,0,A,b,Aeq,beq,lb,ub,[],options);
+        % The final steering angle (that goes to the actuator) is calculated (to smooth the steering angle)
+        sub_korm = 0.8*sub_delta + 0.2*sub_kormanyszog(t-1);
+    else
+        sub_korm = 0;
     end
 
 
