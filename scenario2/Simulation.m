@@ -14,7 +14,7 @@ and the subordinate is always at the left lane.
 This script runs the simulation for every timestep.
 %}
 
-clear;
+clearvars -except num_sim num_good_sim;
 clear global;
 close all;
 clc;
