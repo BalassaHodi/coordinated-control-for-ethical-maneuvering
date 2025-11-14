@@ -107,7 +107,7 @@ for t = 2:length(T)
     dom_palya = dom_palyagen(vehstate(t-1,:));
 
     % Then generate path for the subordinate vehicle
-    %sub_palya = sub_palyagen(vehstate(t-1,:),dom_palya); % THE CREATION OF THE FUNCTIONS ARE NEEDED
+    sub_palya = sub_palyagen(vehstate(t-1,:),dom_palya); % THE CREATION OF THE FUNCTIONS ARE NEEDED
 
     
     % If there's ab error during the generation of the dominant palya, emergency scenario is true

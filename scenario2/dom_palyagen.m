@@ -143,7 +143,7 @@ if ~pathFound && ~dom_OK
     l = 2;
     alpha = dom_palya(1,3);
     while dom_palya(end,1) <= 25
-        dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1)+l];
+        dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1,4)+l];
         idx = idx + 1;
     end
 
@@ -223,7 +223,7 @@ if ~pathFound
         % Get the previous palya
         dom_previous_palya = dom_all_palya{t-2};
 
-        % Check the startPose os mpw
+        % Check the startPose
         startPose_good = false;
 
         % Check where the startPose is now
@@ -278,7 +278,7 @@ if ~pathFound
     l = 2;
     alpha = dom_palya(1,3);
     while dom_palya(end,1) <= 25
-        dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1)+l];
+        dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1,4)+l];
         idx = idx + 1;
     end
 
