@@ -78,17 +78,30 @@ xyPoint3 = [(0:1:mapWidth)' mapLength*ones(31,1)];
 setCosts(sub_costmap,xyPoint3,occupiedVal);
 
 % The ahead points of the reference path of the dominant vehicle
-if size(other_palya,1) >= 7 
-    occupiedVal = 1;
-    xyPoint4 = [
-        other_palya(2,1), other_palya(2,2);
-        other_palya(3,1), other_palya(3,2);
-        other_palya(4,1), other_palya(4,2);
-        other_palya(5,1), other_palya(5,2);
-        other_palya(6,1), other_palya(6,2);
-        other_palya(7,1), other_palya(7,2)];
-    setCosts(sub_costmap,xyPoint4,occupiedVal);
+% if size(other_palya,1) >= 7 
+%     occupiedVal = 1;
+%     xyPoint4 = [
+%         other_palya(2,1), other_palya(2,2);
+%         other_palya(3,1), other_palya(3,2);
+%         other_palya(4,1), other_palya(4,2);
+%         other_palya(5,1), other_palya(5,2);
+%         other_palya(6,1), other_palya(6,2);
+%         other_palya(7,1), other_palya(7,2)];
+%     setCosts(sub_costmap,xyPoint4,occupiedVal);
+% end
+
+% Implement an other kind of technique
+% If the refPath of the dominant vehicle is in the danger zone (in the other lane),
+% than those positions shall be occupied cells
+xyPoint4 = double.empty();
+for i = 1:size(other_palya,1)
+    if other_palya(i,2) >= 4
+        xyPoint4(end+1,:) = [other_palya(i,1), other_palya(i,2)];
+    end
 end
+occupiedVal = 1;
+setCosts(sub_costmap,xyPoint4,occupiedVal);
+
 
 % Plot the costmap for debugging
 % figure;
