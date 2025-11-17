@@ -2,7 +2,8 @@
 This script runs the simulation for every timestep.
 %}
 
-clearvars -except num_sim num_good_sim all_warnings all_sebesseg all_kormanyszog all_vehstate all_vh all_pedestrian;
+clearvars -except num_sim num_good_sim all_warnings all_sebesseg all_kormanyszog all_vehstate all_vhmax all_vamax all_pedestrian va_max vh_max pedestrian va_max_range vh_max_range pedestrian_x_range pedestrian_y_range;
+clearvars -global -except va_max vh_max pedestrian;
 close all;
 % clc;
 
@@ -15,21 +16,32 @@ global palya;       % [n-by-m array] (n: time steps) (m: the poses of the refere
 global costmap;     % [vehicleCostmap] (the vehicle costmap representing the planning search space around the av.)
 global kormanyszog; % [1-by-m double] (m: the steering angles actually given to the actuator in radians in each time step)
 global sebesseg;    % [1-by-m double] (m: the actual velocity of the av. in m/s in each time step)
-global va_max;      % [double] the maximum velocity of the av. in m/s
+global va_max;      % [double] the maximum velocity of the av. in km/h
 global all_palya;   % [n-by-1 cell] (n: the timestep that contains the palya array)
 global warnings;    % [n-by-4 cell] (n: the number of warnings in a single simulation) (the columns: Code, Type, TimeStep, Description)
 global emergency;   % [boolean] (true if the emergency situation happens (go straight with max deceleration)
-global vh;          % [double] (the constant longitudinal velocity of the hv. in m/s)
 global pedestrian;  % [1-by-2 double] (the x-y position of the pedestrian in m)
+global vh_max;      % [double] the maximum velocity of the hv. in km/h
+global goal_pos;    % [1-by-3 double] the goal position of the av. [x, y, psi]
+global start_pos;   % [1-by-3 double] the start position of the av. [x, y, psi]
+
+% Initialize global variables
+% va_max = 60;
+% vh_max = 40;
+% pedestrian = [10, 2.5];
+start_pos = [1, 2.5, 0];
+goal_pos = [25, 2.5, 0];
+
 
 % The steps
-steps = 15;
+Ts = 0.1;
+steps = ceil(((goal_pos(1)-start_pos(1))/(va_max/3.6))/Ts);
 
 % Initialize global variables
 all_palya = cell(steps,1);
 warnings = {};
 emergency = false;
-va_max = 60;
+
 
 % Vehicles constant parameters
 C1 = 80000;     % cornering stiffness of front tires
@@ -52,9 +64,9 @@ current_run = 0;
 
 % Initial values
 va = va_max/3.6;                 % the maximum velocity of the av. in m/s
-vh = 40/3.6;                     % human-driven vehicle velocity in m/s (for the whole simulation remains the same)
+vh = vh_max/3.6;                 % human-driven vehicle velocity in m/s (for the whole simulation remains the same)
 vehsD = [0; 0; 0];               % initial condition
-vehstate(1,:) = [1, 2.5, 0, 15]; % the av. is in the begining of the route and in the middle of its lane, ...
+vehstate(1,:) = [start_pos 15];  % the av. is in the begining of the route and in the middle of its lane, ...
                                  % the hv. is at the opposite end of the opposite lane
 kormanyszog(1) = 0;              % the initial steering angle in radians
 sebesseg(1) = va;                % av. initial velocity in m/s
