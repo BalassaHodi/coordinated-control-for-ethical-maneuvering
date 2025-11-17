@@ -1,20 +1,27 @@
+% SCENARIO 2
+
 %{
 This is the main script to control the different simulations and evaluate them.
 %}
 
+clear global;
+clear;
 clc;
-global OK;
-global warnings;
 
-OK = false;
+global sub_OK dom_OK;
+% global warnings;
+
+sub_OK = false;
+dom_OK = false;
 num_sim = 0;
 num_good_sim = 0;
 
 % for i=1:20
-while ~OK
+while ~sub_OK || ~dom_OK
     num_sim = num_sim + 1;
     run Simulation.m
-    if ~OK
+
+    if ~sub_OK || ~dom_OK
         warning(['Hiba a ', num2str(num_sim), '. szimulációban.']);
     else
         num_good_sim = num_good_sim + 1;
@@ -25,7 +32,3 @@ end
 disp(['Összes szimuláció: ', num2str(num_sim)]);
 disp(['Jó szimulációk: ', num2str(num_good_sim)]);
 disp(['A sikeres szimulációk aránya: ', num2str(num_good_sim/num_sim)]);
-disp('Az ideálistól eltérő események:');
-for i = 1:length(warnings)
-    disp(warnings{i})
-end
