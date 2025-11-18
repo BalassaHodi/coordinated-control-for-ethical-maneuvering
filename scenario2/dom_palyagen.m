@@ -30,7 +30,7 @@ danger = false;
 
 
 % Create the costmap
-mapWidth = 30;
+mapWidth = dom_goal_pos(1)+5;
 mapLength = 10;
 costVal = 0;
 cellSize = 0.5;
@@ -56,10 +56,10 @@ setCosts(dom_costmap,xyPoint2,occupiedVal);
 
 % The sides of the roads
 occupiedVal = 0.6;
-xyPoint3 = [(0:1:mapWidth)' 0*ones(31,1)];
+xyPoint3 = [(0:1:mapWidth)' 0*ones(mapWidth+1,1)];
 setCosts(dom_costmap,xyPoint3,occupiedVal);
 occupiedVal = 0.6;
-xyPoint3 = [(0:1:mapWidth)' mapLength*ones(31,1)];
+xyPoint3 = [(0:1:mapWidth)' mapLength*ones(mapWidth+1,1)];
 setCosts(dom_costmap,xyPoint3,occupiedVal);
 
 % Plot the costmap for debugging
@@ -79,7 +79,7 @@ dom_OK = checkFree(dom_costmap,startPose);
 % If the startPose is bad, than the plan function doesn't work, so we have
 % to use the previous path for safety
 if ~dom_OK
-    disp('[DOM] A startPose nem megfelelő, így az előző referenciapálya használata...');
+    % disp('[DOM] A startPose nem megfelelő, így az előző referenciapálya használata...');
 
     % Work with the previous path
     if t > 2
@@ -119,13 +119,16 @@ if ~dom_OK
 
     if pathFound
         dom_emergency = false;
-        disp('[DOM] Az előző referenciapálya van felhasználva.');
+        % disp('[DOM] Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
-        % dom_warnings(end+1,:) = {2,'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
+        dom_warnings(end+1,:) = {'DOM', 2,'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
 
         % If the planned path goes to the other lane, then danger situation is active
         danger = any(dom_palya(:,2) >= 4);
+        if danger
+            dom_warnings(end+1,:) = {'DOM', 9, 'Info', t-1, 'A referenciapálya veszélyes zónába lett tervezve'};
+        end
         return
     end
 else
@@ -148,11 +151,14 @@ if ~pathFound && ~dom_OK
     end
 
     kimenet = dom_palya;
-    disp('[DOM] Nem tudott létrejönni referenciapálya');
-    % dom_warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
+    % disp('[DOM] Nem tudott létrejönni referenciapálya');
+    dom_warnings(end+1,:) = {'DOM', 3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
 
     % If the planned path goes to the other lane, then danger situation is active
     danger = any(dom_palya(:,2) >= 4);
+    if danger
+        dom_warnings(end+1,:) = {'DOM', 9, 'Info', t-1, 'A referenciapálya veszélyes zónába lett tervezve'};
+    end
     return
 end
 
@@ -207,17 +213,17 @@ for attempt = 1:maxAttempts
         pathFound = true;
         dom_emergency = false;
         if attempt ~= 1
-            % dom_warnings(end+1,:) = {4, 'Info', t-1, sprintf('A referenciapálya létrehozása %d. iterációra történt meg.', attempt)};
+            dom_warnings(end+1,:) = {'DOM', 4, 'Info', t-1, sprintf('A referenciapálya létrehozása %d. iterációra történt meg.', attempt)};
         end
         break
     end
 
-    disp(['[DOM] Attempt ', num2str(attempt), ' failed, retrying...']);
+    % disp(['[DOM] Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    disp('[DOM] Előző referenciapálya használata...');
+    % disp('[DOM] Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
         % Get the previous palya
@@ -256,13 +262,16 @@ if ~pathFound
 
     if pathFound
         dom_emergency = false;
-        disp('[DOM] Az előző referenciapálya van felhasználva.');
+        % disp('[DOM] Az előző referenciapálya van felhasználva.');
         dom_all_palya{t-1} = dom_palya;
         kimenet = dom_palya;
-        % dom_warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
+        dom_warnings(end+1,:) = {'DOM', 5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
 
         % If the planned path goes to the other lane, then danger situation is active
         danger = any(dom_palya(:,2) >= 4);
+        if danger
+            dom_warnings(end+1,:) = {'DOM', 9, 'Info', t-1, 'A referenciapálya veszélyes zónába lett tervezve'};
+        end
         return
     end
 end
@@ -283,19 +292,22 @@ if ~pathFound
     end
 
     kimenet = dom_palya;
-    disp('[DOM] Nem tudott létrejönni referenciapálya');
-    % dom_warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
+    % disp('[DOM] Nem tudott létrejönni referenciapálya');
+    dom_warnings(end+1,:) = {'DOM', 6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
 
     % If the planned path goes to the other lane, then danger situation is active
     danger = any(dom_palya(:,2) >= 4);
+    if danger
+        dom_warnings(end+1,:) = {'DOM', 9, 'Info', t-1, 'A referenciapálya veszélyes zónába lett tervezve'};
+    end
     return
 end
 
 
 % If the path was created by RRT in the actual timestep
 % Plot the actual planned path (if there was)
-figure;
-plot(planner)
+% figure;
+% plot(planner)
 
 
 % Create the output vector
@@ -313,7 +325,7 @@ end
 removedIndices = setdiff(1:length(dom_palya(:,1)),ia);
 for i = 1:length(removedIndices)
     dom_palya(removedIndices(i),:) = [];
-    % dom_warnings(end+1,:) = {7, 'Info', t-1, sprintf('Törölni kellett a %d. sort a pályából.',removedIndices(i))};
+    dom_warnings(end+1,:) = {'DOM', 7, 'Info', t-1, sprintf('Törölni kellett a %d. sort a pályából.',removedIndices(i))};
 end
 
 % Store the palya 
@@ -324,6 +336,9 @@ kimenet = dom_palya;
 
 % If the planned path goes to the other lane, then danger situation is active
 danger = any(dom_palya(:,2) >= 4);
+if danger
+    dom_warnings(end+1,:) = {'DOM', 9, 'Info', t-1, 'A referenciapálya veszélyes zónába lett tervezve'};
+end
 
 
 

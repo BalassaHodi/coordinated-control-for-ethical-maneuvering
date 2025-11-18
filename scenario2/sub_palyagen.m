@@ -23,29 +23,15 @@ global sub_emergency;
 global t;
 global sub_costmap;
 global danger;
+global dom_goal_pos;
 
 
 % Clear the palya from the previous iteration
 sub_palya = double.empty();
 
 
-% If there is no danger, then the palya shall be a straight line in the middle of the lane
-if ~danger
-    sub_palya(1,:) = [input(4), input(5), input(6), 0];
-    idx = 2;
-    l = 2;
-    while sub_palya(end,1) >= sub_goal_pos(1)
-        sub_palya(idx,:) = [sub_palya(idx-1,1)-l, 7.5, 0, sub_palya(idx-1,4)+l];
-        idx = idx + 1;
-    end
-    kimenet = sub_palya;
-    disp('[SUB] Nincs veszély.');
-    return
-end
-
-
 % Create the costmap
-mapWidth = 30;
+mapWidth = dom_goal_pos(1)+5;
 mapLength = 10;
 costVal = 0;
 cellSize = 0.5;
@@ -71,10 +57,10 @@ setCosts(sub_costmap,xyPoint2,occupiedVal);
 
 % The sides of the roads
 occupiedVal = 0.6;
-xyPoint3 = [(0:1:mapWidth)' 0*ones(31,1)];
+xyPoint3 = [(0:1:mapWidth)' 0*ones(mapWidth+1,1)];
 setCosts(sub_costmap,xyPoint3,occupiedVal);
 occupiedVal = 0.6;
-xyPoint3 = [(0:1:mapWidth)' mapLength*ones(31,1)];
+xyPoint3 = [(0:1:mapWidth)' mapLength*ones(mapWidth+1,1)];
 setCosts(sub_costmap,xyPoint3,occupiedVal);
 
 % The ahead points of the reference path of the dominant vehicle
@@ -99,13 +85,33 @@ for i = 1:size(other_palya,1)
         xyPoint4(end+1,:) = [other_palya(i,1), other_palya(i,2)];
     end
 end
-occupiedVal = 1;
-setCosts(sub_costmap,xyPoint4,occupiedVal);
+if ~isempty(xyPoint4)
+    occupiedVal = 1;
+    setCosts(sub_costmap,xyPoint4,occupiedVal);
+end
 
 
 % Plot the costmap for debugging
 % figure;
 % plot(sub_costmap);
+
+
+
+% If there is no danger, then the palya shall be a straight line in the middle of the lane
+if ~danger
+    sub_palya(1,:) = [input(4), input(5), input(6), 0];
+    idx = 2;
+    l = 2;
+    while sub_palya(end,1) >= sub_goal_pos(1)
+        sub_palya(idx,:) = [sub_palya(idx-1,1)-l, 7.5, 0, sub_palya(idx-1,4)+l];
+        idx = idx + 1;
+    end
+    kimenet = sub_palya;
+    % disp('[SUB] Nincs veszély.');
+    return
+else
+    sub_warnings(end+1,:) = {'SUB', 9, 'Info', t-1, 'A jármű veszélyhelyzetben, így referenciapálya-tervezés szükséges.'};
+end
 
 
 
@@ -120,7 +126,7 @@ sub_OK = checkFree(sub_costmap,[startPose(1), startPose(2), startPose(3)+180]); 
 % If the startPose is bad, than the plan function doesn't work, so we have 
 % to use the previous path for safety
 if ~sub_OK
-    disp('[SUB] A startPose nem megfelelő, így az előző referenciapálya használata...');
+    % disp('[SUB] A startPose nem megfelelő, így az előző referenciapálya használata...');
 
     % Work with the previous path
     if t > 2
@@ -160,10 +166,10 @@ if ~sub_OK
 
     if pathFound
         sub_emergency = false;
-        disp('[SUB] Az előző referenciapálya van felhasználva.');
+        % disp('[SUB] Az előző referenciapálya van felhasználva.');
         sub_all_palya{t-1} = sub_palya;
         kimenet = sub_palya;
-        % sub_warnings(end+1,:) = {2,'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
+        sub_warnings(end+1,:) = {'SUB', 2, 'Warning', t-1, 'A startPose nem volt megfelelő, így az előző referenciapálya volt felhasználva.'};
         return
     end
 else
@@ -186,8 +192,8 @@ if ~pathFound && ~sub_OK
     end
 
     kimenet = sub_palya;
-    disp('[SUB] Nem tudott létrehönni referenciapálya.');
-    % sub_warnings(end+1,:) = {3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
+    % disp('[SUB] Nem tudott létrehönni referenciapálya.');
+    sub_warnings(end+1,:) = {'SUB', 3, 'Error', t-1, 'A startPose nem volt megfelelő, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
 
@@ -242,17 +248,17 @@ for attempt = 1:maxAttempts
         pathFound = true;
         sub_emergency = false;
         if attempt ~= 1
-            % sub_warnings(end+1,:) = {4, 'Info', t-1, sprintf('A referenciapálya létrehozása %d. iterációra történt meg.', attempt)};
+            sub_warnings(end+1,:) = {'SUB', 4, 'Info', t-1, sprintf('A referenciapálya létrehozása %d. iterációra történt meg.', attempt)};
         end
         break
     end
 
-    disp(['[SUB] Attempt ', num2str(attempt), ' failed, retrying...']);
+    % disp(['[SUB] Attempt ', num2str(attempt), ' failed, retrying...']);
 end
 
 % Path couldn't be created in this iteration, so try to use the previous path
 if ~pathFound
-    disp('[SUB] Előző referenciapálya használata...');
+    % disp('[SUB] Előző referenciapálya használata...');
     % Work with the previous path
     if t > 2
         % Get the previous palya
@@ -291,10 +297,10 @@ if ~pathFound
 
     if pathFound
         sub_emergency = false;
-        disp('[SUB] Az előző referenciapálya van felhasználva.');
+        % disp('[SUB] Az előző referenciapálya van felhasználva.');
         sub_all_palya{t-1} = sub_palya;
         kimenet = sub_palya;
-        % sub_warnings(end+1,:) = {5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
+        sub_warnings(end+1,:) = {'SUB', 5, 'Warning', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, így az előző referenciapálya volt felhasználva.'};
         return
     end
 end
@@ -315,16 +321,16 @@ if ~pathFound
     end
 
     kimenet = sub_palya;
-    disp('[SUB] Nem tudott létrejönni referenciapálya.');
-    % sub_warnings(end+1,:) = {6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
+    % disp('[SUB] Nem tudott létrejönni referenciapálya.');
+    sub_warnings(end+1,:) = {'SUB', 6, 'Error', t-1, 'Az időlépésben nem lehetett referenciapályát generálni, és az előző referenciapályát sem lehetett felhasználni.'};
     return
 end
 
 
 % If the path was created by RRT* in the actual timestep
 % Plot the actual planned path (if there was)
-figure;
-plot(planner)
+% figure;
+% plot(planner)
 
 
 % Create the output vector
@@ -342,7 +348,7 @@ end
 removedIndices = setdiff(1:length(sub_palya(:,1)),ia);
 for i = 1:length(removedIndices)
     sub_palya(removedIndices(i),:) = [];
-    % sub_warnings(end+1,:) = {7, 'Info', t-1, sprintf('Törölni kellett a %d. sort a pályából.',removedIndices(i))};
+    sub_warnings(end+1,:) = {'SUB', 7, 'Info', t-1, sprintf('Törölni kellett a %d. sort a pályából.',removedIndices(i))};
 end
 
 % Store the palya
