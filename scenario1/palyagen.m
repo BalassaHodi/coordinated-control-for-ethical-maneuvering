@@ -19,6 +19,7 @@ global t;
 global warnings;
 global emergency;
 global pedestrian;
+global goal_pos;
 
 % Clear the palya from the previous iteration
 palya = double.empty();
@@ -41,9 +42,8 @@ costmap.CollisionChecker = ccConfig;
 % Create the obstacles
 % The pedestrian in the middle of the road
 occupiedVal = 1;
-xyPoint1 = [10,2.5]; 
+xyPoint1 = pedestrian;
 setCosts(costmap,xyPoint1,occupiedVal);
-pedestrian = xyPoint1;
 
 % The hv. in the other lane based on its current x_hv position from the input
 % The hv. is created by inflating 3 points
@@ -66,7 +66,7 @@ setCosts(costmap,xyPoint3,occupiedVal);
 % Set the startPose and the goalPose of the av.
 % The startPose is based on the input, while the goalPose is the end of the av. lane
 startPose = [input(1), input(2), input(3)*180/pi]; % HERE WAS A BUG, the psi was not converted into degrees, while the startPose and the goalPose has to be in degrees!
-goalPose  = [25, 2.5, 0];
+goalPose  = goal_pos;
 
 
 % Check the startpose

@@ -19,6 +19,7 @@ global vehsD vehstate t;
 global palya;
 global kormanyszog;
 global sebesseg;
+global warnings;
 
 % Vehicles constant parameters
 C1 = 80000;     % cornering stiffness of front tires
@@ -56,6 +57,10 @@ vehstate_(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate_(t,3));
 
 % Interpolate the y_ref value from the palya
 y_ref = interp1(palya(:,1), palya(:,2), vehstate_(t,1));
+if ~isfinite(y_ref)
+    y_ref = palya(2,2);
+    warnings(end+1,:) = {8, 'Warning', t-1, 'Az interpoláció nem volt sikeres az y_ref kiszámításához.'};
+end
 
 % The cost function that has to be minimized
 kimenet=(y_ref-vehstate_(t,2))^2 + 1.7*(korm-kormanyszog(t-1))^2;
