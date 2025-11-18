@@ -106,6 +106,7 @@ if ~danger
         sub_palya(idx,:) = [sub_palya(idx-1,1)-l, 7.5, 0, sub_palya(idx-1,4)+l];
         idx = idx + 1;
     end
+    sub_OK = true;
     kimenet = sub_palya;
     % disp('[SUB] Nincs veszély.');
     return

@@ -41,13 +41,22 @@ pedestrian_y_range = [2.5, 3, 3.5, 4];
 
 rng("shuffle");
 
-% for i=1:simulations
-while ~sub_OK || ~dom_OK
+for i=1:simulations
+% while ~sub_OK || ~dom_OK
     num_sim = num_sim + 1;
+    warnings = {};
 
     % Randomize initial conditions
     dom_vmax = dom_vmax_range(randi(length(dom_vmax_range)));
     sub_vmax = sub_vmax_range(randi(length(sub_vmax_range)));
+
+    % if dom_vmax=70 and sub_vmx=40 are chosen at the same time, it leads to an error, so dont use it
+    % same with 70 70
+    while (dom_vmax == 70 && sub_vmax == 40) || (dom_vmax == 70 && sub_vmax == 70)
+        dom_vmax = dom_vmax_range(randi(length(dom_vmax_range)));
+        sub_vmax = sub_vmax_range(randi(length(sub_vmax_range)));
+    end
+
     dist = ceil((sub_vmax/3.6)*(24/(dom_vmax/3.6)));
     dom_goal_x = 4+dist+5;
     ped_xmin = dom_goal_x - 15;
@@ -73,22 +82,32 @@ while ~sub_OK || ~dom_OK
     % Create global warnings
     % If errors
     if any(contains(dom_warnings(:,3), 'Error')) && ~any(contains(sub_warnings(:,3), 'Error'))
+        dom_OK = false;
         warnings(end+1,:) = {1, 'Error', num_sim, 'Vészhelyzet! A domináns jármű vészhelzetben volt!'};
     elseif any(contains(sub_warnings(:,3), 'Error')) && ~any(contains(dom_warnings(:,3), 'Error'))
+        sub_OK = false;
         warnings(end+1,:) = {2, 'Error', num_sim, 'Vészhelyzet! Az alárendelt jármű vészhelyzetben volt!'};
     elseif any(contains(dom_warnings(:,3), 'Error')) && any(contains(sub_warnings(:,3), 'Error'))
+        dom_OK = false;
+        sub_OK = false;
         warnings(end+1,:) = {3, 'Error', num_sim, 'Vészhelyzet! Mindkét jármű vészhelyzetben volt!'};
 
     % If no error, just warnings
     elseif any(contains(dom_warnings(:,3), 'Warning')) || any(contains(sub_warnings(:,3), 'Warning'))
+        dom_OK = true;
+        sub_OK = true;
         warnings(end+1,:) = {4, 'Warning', num_sim, 'A szimulációban legfeljebb csak "warning" típusú üzenetek voltak.'};
 
     % If no warnings just infos
     elseif any(contains(dom_warnings(:,3), 'Info')) || any(contains(sub_warnings(:,3), 'Info'))
+        dom_OK = true;
+        sub_OK = true;
         warnings(end+1,:) = {5, 'Info', num_sim, 'A szimulációban csak "info" típusú üzenetek voltak.'};
 
     % If none of them
     else
+        dom_OK = true;
+        sub_OK = true;
         warnings(end+1,:) = {0, 'Info', num_sim, 'A szimuláció ideálisan lefutott.'};
     end
 
@@ -118,4 +137,4 @@ disp(['Jó szimulációk: ', num2str(num_good_sim)]);
 disp(['A sikeres szimulációk aránya: ', num2str(num_good_sim/num_sim)]);
 
 % Save all the simulation results
-% save scenario2_random_init_sim_results1.mat all_domvmax all_kormanyszog all_pedestrian all_sebesseg all_subvmax all_vehstate all_warnings num_sim num_good_sim;
+% save scenario2_random_init_sim_results4.mat all_domvmax all_kormanyszog all_pedestrian all_sebesseg all_subvmax all_vehstate all_warnings num_sim num_good_sim;

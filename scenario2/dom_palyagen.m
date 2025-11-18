@@ -146,7 +146,8 @@ if ~pathFound && ~dom_OK
     l = 2;
     alpha = dom_palya(1,3);
     while dom_palya(end,1) <= 25
-        dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1,4)+l];
+        %dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1,4)+l];
+        dom_palya(idx,:) = [dom_palya(idx-1,1)+l, dom_palya(idx-1,2), 0, dom_palya(idx-1,4)+l];
         idx = idx + 1;
     end
 
@@ -287,7 +288,8 @@ if ~pathFound
     l = 2;
     alpha = dom_palya(1,3);
     while dom_palya(end,1) <= 25
-        dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1,4)+l];
+        %dom_palya(idx,:) = [dom_palya(idx-1,1)+cos(alpha)*l, dom_palya(idx-1,2)+sin(alpha)*l, dom_palya(1,3), dom_palya(idx-1,4)+l];
+        dom_palya(idx,:) = [dom_palya(idx-1,1)+l, dom_palya(idx-1,2), 0, dom_palya(idx-1,4)+l];
         idx = idx + 1;
     end
 

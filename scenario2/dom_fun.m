@@ -60,8 +60,13 @@ vehstate_(t,1) = vehstate(t-1,1) + v_x*Ts*cos(vehstate_(t,3));
 vehstate_(t,2) = vehstate(t-1,2) + v_x*Ts*sin(vehstate_(t,3));
 
 % Interpolate the y_ref value from the dominant palya
-y_ref = interp1(dom_palya(:,1), dom_palya(:,2), vehstate_(t,1));
-if ~isfinite(y_ref)
+if numel(unique(dom_palya(:,1))) == numel(dom_palya(:,1))
+    y_ref = interp1(dom_palya(:,1), dom_palya(:,2), vehstate_(t,1));
+    if ~isfinite(y_ref)
+        y_ref = dom_palya(2,2);
+        dom_warnings(end+1,:) = {'DOM', 8, 'Info', t-1, 'Az interpoláció nem volt sikeres az y_ref kiszámításához.'};
+    end
+else
     y_ref = dom_palya(2,2);
     dom_warnings(end+1,:) = {'DOM', 8, 'Info', t-1, 'Az interpoláció nem volt sikeres az y_ref kiszámításához.'};
 end
