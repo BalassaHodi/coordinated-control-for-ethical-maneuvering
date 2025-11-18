@@ -1,4 +1,5 @@
 % SCENARIO 2
+
 %{
 All the variables containing 'dom' are for the dominant/superior vehicle.
 All the variables containing 'sub' are for the subordinate vehicle.
@@ -14,10 +15,10 @@ and the subordinate is always at the left lane.
 This script runs the simulation for every timestep.
 %}
 
-clearvars -except num_sim num_good_sim;
-clear global;
+clearvars -except num_sim num_good_sim warnings all_warnings all_sebesseg all_kormanyszog all_vehstate all_domvmax all_subvmax all_pedestrian dom_vmax sub_vmax pedestrian dom_vmax_range sub_vmax_range pedestrian_y_range;
+clearvars -global -except dom_vmax sub_vmax pedestrian;
 close all;
-clc;
+% clc;
 
 % Global variables
 global steps;           % the steps of one simulation
@@ -51,13 +52,19 @@ global sub_costmap;
 global danger;
 
 % Initialize global variables
-dom_init_pos = [1, 2.5, 0];
-dom_goal_pos = [25, 2.5, 0];
-sub_init_pos = [20, 7.5, 0];
+dist = ceil((sub_vmax/3.6)*(24/(dom_vmax/3.6)));
+sub_init_pos = [4+dist, 7.5, 0];
 sub_goal_pos = [4, 7.5, 0];
-dom_vmax = 60;
-sub_vmax = 40;
-pedestrian = [10,2.5];
+dom_goal_pos = [sub_init_pos(1)+5, 2.5, 0];
+dom_init_pos = [dom_goal_pos(1)-24, 2.5, 0];
+
+% dom_init_pos = [1, 2.5, 0];
+% dom_goal_pos = [25, 2.5, 0];
+% sub_init_pos = [20, 7.5, 0];
+% sub_goal_pos = [4, 7.5, 0];
+% dom_vmax = 60;
+% sub_vmax = 40;
+% pedestrian = [10,2.5];
 
 
 % Simulation parameters
@@ -99,7 +106,7 @@ sub_sebesseg(1) = sub_v;    % in m/s
 % The simulation (loop that runs for every timestep)
 for t = 2:length(T)
     % The number of the current simulation step (display it to cmd wdw if needed)
-    current_run = current_run + 1
+    current_run = current_run + 1;
 
 
 
@@ -116,13 +123,13 @@ for t = 2:length(T)
     % If there's an error during the generation of the dominant palya, emergency scenario is true
     if ~dom_OK
         dom_emergency = true;
-        % dom_warnings(end+1,:) = {1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
+        dom_warnings(end+1,:) = {'DOM', 1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
     end
 
     % If there's an error during the generation of the subordinate palya, emergency scenario is true
     if ~sub_OK
         sub_emergency = true;
-        % sub_warnings(end+1,:) = {1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
+        sub_warnings(end+1,:) = {'SUB', 1, 'Error', t-1, 'Vészhelyzet! A jármű egyenesen halad maximális fékezéssel!'};
     end
 
 
@@ -148,7 +155,7 @@ for t = 2:length(T)
 
     % Longitudnal control of the dominant vehicle
     if dom_emergency
-        disp('Vészhelyzet van!');
+        % disp('Vészhelyzet van!');
         % maximum deceleration is applied
         dom_seb = max(round(dom_sebesseg(t-1)*3.6)-3, 0.01);
     else
@@ -177,7 +184,7 @@ for t = 2:length(T)
 
     % Longitudinal control of the subordinate vehicle 
     if sub_emergency
-        disp('Vészhelyzet van!');
+        % disp('Vészhelyzet van!');
         % maximum deceleration is applied
         sub_seb = max(round(sub_sebesseg(t-1)*3.6)-3,0.01);
     else
@@ -240,10 +247,10 @@ for t = 2:length(T)
     sub_kormanyszog(t) = sub_korm;
 end
 
-figure;
-plot(vehstate(:,1),vehstate(:,2), 'o-b');
-xlim([0, 30]);
-ylim([0,10]);
-hold on;
-plot(vehstate(:,4),vehstate(:,5), 'o-r');
-hold off;
+% figure;
+% plot(vehstate(:,1),vehstate(:,2), 'o-b');
+% xlim([0, 30]);
+% ylim([0,10]);
+% hold on;
+% plot(vehstate(:,4),vehstate(:,5), 'o-r');
+% hold off;
