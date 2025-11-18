@@ -78,12 +78,12 @@ for i = 1:size(all_warnings,1)
         num_info = num_info + 1;
     elseif any(contains(one_warning(:,2), 'Warning')) && ~any(contains(one_warning(:,2), 'Error'))
         % Here is a problem with the code, because every warning with the error code 8
-        % are actually info, not warning!
-        if any(cell2mat(one_warning(:,1)) == 8)
+        % are actually info, not warning! So only error code 2 and 5 are true warnings!
+        if any(cell2mat(one_warning(:,1)) == 2) || any(cell2mat(one_warning(:,1)) == 5)
+            num_warning = num_warning + 1;
+        else
             num_info = num_info + 1;
-            continue
         end
-        num_warning = num_warning + 1;
     elseif any(contains(one_warning(:,2), 'Error'))
         num_error = num_error + 1;
     end
@@ -103,16 +103,13 @@ for i = 1:size(all_warnings,1)
     if any(contains(one_warning(:,2), 'Warning')) && ~any(contains(one_warning(:,2), 'Error'))
         % Here is a problem with the code, because every warning with the error code 8
         % are actually info, not warning!
-        if any(cell2mat(one_warning(:,1)) == 8)
-            continue
-        end
-        
-        if any(cell2mat(one_warning(:,1)) == 2)
-            startpose_not_good = startpose_not_good + 1;
-        end
-
-        if any(cell2mat(one_warning(:,1)) == 5)
-            no_rrt_use_prev_path = no_rrt_use_prev_path + 1;
+        if any(cell2mat(one_warning(:,1)) == 2) || any(cell2mat(one_warning(:,1)) == 5)
+            if any(cell2mat(one_warning(:,1)) == 2)
+                startpose_not_good = startpose_not_good + 1;
+            end
+            if any(cell2mat(one_warning(:,1)) == 5)
+                no_rrt_use_prev_path = no_rrt_use_prev_path + 1;
+            end
         end
     end
 end
@@ -126,6 +123,8 @@ grid on;
 % See the different types of errors
 num_critical_error = 0;
 num_non_critical_error = 0;
+critical_error_indices = [];
+non_critical_error_indices = [];
 for i = 1:size(all_warnings,1)
     one_warning = all_warnings{i,1};
     if any(contains(one_warning(:,2), 'Error'))
@@ -133,8 +132,9 @@ for i = 1:size(all_warnings,1)
         one_pedestrian = all_pedestrian{i,1};
         was_crit_error = false;
         for j = 1:size(one_vehstate,1)
-            if one_vehstate(j,1) >= one_pedestrian(1)-1.5 && one_vehstate(j,2) <= one_pedestrian(2)+1.5 && one_vehstate(j,2) >= one_pedestrian(2)-1.5
+            if one_vehstate(j,1) >= one_pedestrian(1)-1.5 && one_vehstate(j,1) <= one_pedestrian(1)+1.5 && one_vehstate(j,2) <= one_pedestrian(2)+1.5 && one_vehstate(j,2) >= one_pedestrian(2)-1.5
                 num_critical_error = num_critical_error + 1;
+                critical_error_indices(end+1,1) = i;
                 was_crit_error = true;
                 break
             end
@@ -142,6 +142,7 @@ for i = 1:size(all_warnings,1)
 
         if ~was_crit_error 
             num_non_critical_error = num_non_critical_error + 1;
+            non_critical_error_indices(end+1,1) = i;
         end
     end
 end
