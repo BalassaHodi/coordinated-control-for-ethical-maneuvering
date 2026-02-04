@@ -24,6 +24,7 @@ global goal_pos;
 % Clear the palya from the previous iteration
 palya = double.empty();
 
+
 % Create the costmap
 mapWidth = 30;
 mapLength = 10;
@@ -47,7 +48,7 @@ setCosts(costmap,xyPoint1,occupiedVal);
 
 % The hv. in the other lane based on its current x_hv position from the input
 % The hv. is created by inflating 3 points
-xyPoint2 = [input(4),7.5; input(4)+2.25,7.5; input(4)+4.5,7.5]; 
+xyPoint2 = [input(4)-2,7.5; input(4),7.5; input(4)+2,7.5]; 
 setCosts(costmap,xyPoint2,occupiedVal);
 
 % The sides of the roads
