@@ -41,8 +41,8 @@ pedestrian_y_range = [2.5, 3, 3.5, 4];
 
 rng("shuffle");
 
-for i=1:simulations
-% while ~sub_OK || ~dom_OK
+% for i=1:simulations
+while ~sub_OK || ~dom_OK
     num_sim = num_sim + 1;
     warnings = {};
 
