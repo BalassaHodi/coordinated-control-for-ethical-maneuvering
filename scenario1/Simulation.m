@@ -66,7 +66,7 @@ current_run = 0;
 va = va_max/3.6;                 % the maximum velocity of the av. in m/s
 vh = vh_max/3.6;                 % human-driven vehicle velocity in m/s (for the whole simulation remains the same)
 vehsD = [0; 0; 0];               % initial condition
-vehstate(1,:) = [start_pos 15];  % the av. is in the begining of the route and in the middle of its lane, ...
+vehstate(1,:) = [start_pos 20];  % the av. is in the begining of the route and in the middle of its lane, ...
                                  % the hv. is at the opposite end of the opposite lane
 kormanyszog(1) = 0;              % the initial steering angle in radians
 sebesseg(1) = va;                % av. initial velocity in m/s
