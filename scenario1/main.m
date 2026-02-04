@@ -74,8 +74,8 @@ end
 disp(['Összes szimuláció: ', num2str(num_sim)]);
 disp(['Jó szimulációk: ', num2str(num_good_sim)]);
 disp(['A sikeres szimulációk aránya: ', num2str(num_good_sim/num_sim)]);
-disp('Az ideálistól eltérő események:');
-disp(warnings)
+% disp('Az ideálistól eltérő események:');
+% disp(warnings)
 
 % Save all the simulation results
-% save random_init_sim_results10.mat all_warnings all_sebesseg all_kormanyszog all_vehstate all_vhmax all_vamax all_pedestrian num_sim num_good_sim;
+% save random_init_sim2_results10.mat all_warnings all_sebesseg all_kormanyszog all_vehstate all_vhmax all_vamax all_pedestrian num_sim num_good_sim;

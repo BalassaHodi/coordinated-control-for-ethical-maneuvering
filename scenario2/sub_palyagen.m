@@ -334,6 +334,9 @@ end
 % plot(planner)
 
 
+
+
+
 % Create the output vector
 sub_palya(1,:) = [startPose(1), startPose(2), startPose(3)*pi/180, 0];
 for i = 1:length(refPath.PathSegments(1,:))

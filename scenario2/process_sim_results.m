@@ -80,10 +80,14 @@ success_rate = sum(num_good_sim)/sum(num_sim);
 disp(['A sikeres szimulációk aránya: ', num2str(success_rate)]);
 
 % Visualize the success rate
+% figure;
+% pie([success_rate, 1-success_rate], {sprintf('Successful: %.2f%%', success_rate*100), sprintf('Unsuccessful: %.2f%%', (1-success_rate)*100)});
+% title('Success Rate of Simulations');
+% grid on;
 figure;
-pie([success_rate, 1-success_rate], {sprintf('Successful: %.2f%%', success_rate*100), sprintf('Unsuccessful: %.2f%%', (1-success_rate)*100)});
-title('Success Rate of Simulations');
-grid on;
+piechart([sum(num_good_sim), sum(num_sim)-sum(num_good_sim)], {'Sikeres', 'Sikertelen'});
+% title('Success Rate of Simulations');
+set(gca,'FontSize',30);
 
 
 % See the different warnings
@@ -102,10 +106,14 @@ for i = 1:size(all_warnings,1)
 end
 
 % Visualize the different outputs in simulations
+% figure;
+% pie([num_info, num_warning, num_error], {sprintf('No issue: %.2f%%', (num_info/200)*100), sprintf('Only warnings: %.2f%%', (num_warning/200)*100), sprintf('Errors: %.2f%%', (num_error/200)*100)});
+% title('Outputs of the simulations');
+% grid on;
 figure;
-pie([num_info, num_warning, num_error], {sprintf('No issue: %.2f%%', (num_info/200)*100), sprintf('Only warnings: %.2f%%', (num_warning/200)*100), sprintf('Errors: %.2f%%', (num_error/200)*100)});
-title('Outputs of the simulations');
-grid on;
+piechart([num_info, num_warning, num_error], {'Ideális', 'Csak figyelmeztetések', 'Hibák'});
+% title('Outputs of the simulations');
+set(gca,'FontSize',30);
 
 
 % The types of errors
@@ -129,10 +137,15 @@ end
 
 % Visualize the different outputs in simulations
 % Visualize the different types of errors in a pie chart
+% figure;
+% pie([num_dom_error, num_sub_error, num_both_error], {sprintf('Dominant errors: %.2f%%', (num_dom_error/size(all_warnings,1))*100), sprintf('Subordinate errors: %.2f%%', (num_sub_error/size(all_warnings,1))*100), sprintf('Both errors: %.2f%%', (num_both_error/size(all_warnings,1))*100)});
+% title('Types of Errors in Simulations');
+% grid on;
 figure;
-pie([num_dom_error, num_sub_error, num_both_error], {sprintf('Dominant errors: %.2f%%', (num_dom_error/size(all_warnings,1))*100), sprintf('Subordinate errors: %.2f%%', (num_sub_error/size(all_warnings,1))*100), sprintf('Both errors: %.2f%%', (num_both_error/size(all_warnings,1))*100)});
-title('Types of Errors in Simulations');
-grid on;
+piechart([num_dom_error, num_sub_error], {'Domináns jármű hiba', 'Alárendelt jármű hiba'});
+% title('Types of Errors in Simulations');
+% grid on;
+set(gca,'FontSize',30);
 
 
 % See the dominant errors
@@ -166,7 +179,12 @@ for i = 1:size(all_warnings,1)
 end
 
 % Visualize the different types of errors
+% figure;
+% pie([num_critical_error, num_non_critical_error], {sprintf('Critical error (collusion): %d', num_critical_error), sprintf('Non critical errors (no collusion just hard brake): %d', num_non_critical_error)});
+% title('Types of errors');
+% grid on;
 figure;
-pie([num_critical_error, num_non_critical_error], {sprintf('Critical error (collusion): %d', num_critical_error), sprintf('Non critical errors (no collusion just hard brake): %d', num_non_critical_error)});
-title('Types of errors');
-grid on;
+piechart([num_critical_error, num_non_critical_error], {'Kritikus hiba', 'Nem kritikus hiba'},'LabelStyle','namedata');
+% title('Types of errors');
+% grid on;
+set(gca,'FontSize',30);
