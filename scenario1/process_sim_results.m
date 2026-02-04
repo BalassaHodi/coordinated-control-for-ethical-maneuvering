@@ -4,7 +4,7 @@ close all;
 
 % READ .MAT FILES
 % File pattern and variable names
-files = arrayfun(@(k) sprintf('random_init_sim_results%d.mat', k), 1:10, 'uni', false);
+files = arrayfun(@(k) sprintf('random_init_sim2_results%d.mat', k), 1:10, 'uni', false);
 cellVars = {'all_warnings','all_sebesseg','all_kormanyszog','all_vehstate','all_vhmax','all_vamax','all_pedestrian'};
 numVars  = {'num_sim','num_good_sim'};
 
@@ -63,10 +63,15 @@ success_rate = sum(num_good_sim)/sum(num_sim);
 disp(['A sikeres szimulációk aránya: ', num2str(success_rate)]);
 
 % Visualize the success rate
+% figure;
+% pie([success_rate, 1-success_rate], {sprintf('Successful: %.2f%%', success_rate*100), sprintf('Unsuccessful: %.2f%%', (1-success_rate)*100)});
+% title('Success Rate of Simulations');
+% grid on;
 figure;
-pie([success_rate, 1-success_rate], {sprintf('Successful: %.2f%%', success_rate*100), sprintf('Unsuccessful: %.2f%%', (1-success_rate)*100)});
-title('Success Rate of Simulations');
-grid on;
+piechart([sum(num_good_sim), sum(num_sim)-sum(num_good_sim)], {'Sikeres', 'Sikertelen'});
+% title('Szimulációk sikeressége');
+set(gca,'FontSize',30);
+
 
 % See the different warnings
 num_info = 0;
@@ -90,10 +95,15 @@ for i = 1:size(all_warnings,1)
 end
 
 % Visualize the different outputs in simulations
+% figure;
+% pie([num_info, num_warning, num_error], {sprintf('No issue: %.2f%%', (num_info/200)*100), sprintf('Only warnings: %.2f%%', (num_warning/200)*100), sprintf('Errors: %.2f%%', (num_error/200)*100)});
+% title('Outputs of the simulations');
+% grid on;
 figure;
-pie([num_info, num_warning, num_error], {sprintf('No issue: %.2f%%', (num_info/200)*100), sprintf('Only warnings: %.2f%%', (num_warning/200)*100), sprintf('Errors: %.2f%%', (num_error/200)*100)});
-title('Outputs of the simulations');
-grid on;
+piechart([num_info, num_warning, num_error], {'Ideális', 'Csak figyelmeztetések', 'Hibák'});
+% title('Szimulációk kimenetei');
+set(gca,'FontSize',30);
+
 
 % The types of warnings
 startpose_not_good = 0;
@@ -115,10 +125,15 @@ for i = 1:size(all_warnings,1)
 end
 
 % Visualize the different types of warnings
+% figure;
+% pie([startpose_not_good, no_rrt_use_prev_path], {sprintf('StartPose not good, previous refPath is used: %d', startpose_not_good), sprintf('No RRT in time step, previous refPath is used: %d', no_rrt_use_prev_path)});
+% title('Types of warnings');
+% grid on;
 figure;
-pie([startpose_not_good, no_rrt_use_prev_path], {sprintf('StartPose not good, previous refPath is used: %d', startpose_not_good), sprintf('No RRT in time step, previous refPath is used: %d', no_rrt_use_prev_path)});
-title('Types of warnings');
-grid on;
+piechart([startpose_not_good, no_rrt_use_prev_path], {'Kezdeti pozíció nem jó', 'Trajektóra az előző időlépésből'});
+% title('Figyelmeztetések fajtái');
+set(gca,'FontSize',30);
+
 
 % See the different types of errors
 num_critical_error = 0;
@@ -148,7 +163,11 @@ for i = 1:size(all_warnings,1)
 end
 
 % Visualize the different types of errors
+% figure;
+% pie([num_critical_error, num_non_critical_error], {sprintf('Critical error (collusion): %d', num_critical_error), sprintf('Non critical errors (no collusion just hard brake): %d', num_non_critical_error)});
+% title('Types of errors');
+% grid on;
 figure;
-pie([num_critical_error, num_non_critical_error], {sprintf('Critical error (collusion): %d', num_critical_error), sprintf('Non critical errors (no collusion just hard brake): %d', num_non_critical_error)});
-title('Types of errors');
-grid on;
+piechart([num_critical_error, num_non_critical_error], {'Kritikus hiba', 'Nem kritikus hiba'}, 'LabelStyle', 'namedata');
+% title('Hibás események fajtái');
+set(gca,'FontSize',30);
